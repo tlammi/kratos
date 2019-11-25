@@ -1,0 +1,2 @@
+# kratos
+Competition management system
