@@ -1,0 +1,9 @@
+digraph {
+    JudgeUnit -> "MQTT Broker";
+    "MQTT Broker" -> JudgeUnit;
+
+    "MQTT Broker" -> PformScreenUnit;
+    PformScreenUnit -> "MQTT Broker";
+
+    rankdir = "LR";
+}
