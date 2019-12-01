@@ -102,14 +102,14 @@ class MqttEngine:
         if res.rc == mqtt.MQTT_ERR_SUCCESS:
             res.wait_for_publish()
             return
-        elif res.rc == mqtt.MQTT_ERR_NO_CONN:
+        if res.rc == mqtt.MQTT_ERR_NO_CONN:
             raise exceptions.NotConnectedError("Could not publish to topic %s" % topic)
-        elif res.rc == mqtt.MQTT_ERR_QUEUE_SIZE:
+        if res.rc == mqtt.MQTT_ERR_QUEUE_SIZE:
             raise exceptions.QueueFullError("Send buffer is full, cannot publish.")
         raise ValueError("Unknown result code from paho-mqtt: %s" % res.rc)
 
     def _connect_cb(self, client, userdata, flags, rc):
-        LOGGER.info("Connected with result code %s" % rc)
+        LOGGER.info("Connected with result code %s", rc)
         for topic in self._handlers:
             result, mid = client.subscribe(topic)
             if result == mqtt.MQTT_ERR_SUCCESS:
@@ -122,7 +122,27 @@ class MqttEngine:
         LOGGER.info("Disconnected")
 
     def _msg_cb(self, client, userdata, msg):
-        LOGGER.debug("Message from topic: %s" % msg.topic)
+        LOGGER.debug("Message from topic: %s", msg.topic)
 
 
-engine = MqttEngine()
+ENGINE = MqttEngine()
+
+
+def engine():
+    """
+    Get MQTT engine singleton
+
+    :return: Instance of MqttEngine
+    """
+    return ENGINE
+
+
+def topic_handler(*args, **kwargs):
+    """
+    Wrapper for topic handler decorator
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    return ENGINE.topic_handler(*args, **kwargs)

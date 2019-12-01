@@ -1,11 +1,22 @@
+"""
+Exceptions used with MQTT engine
+"""
+
 
 class MqttException(Exception):
-    pass
+    """
+    Base MQTT exception
+    """
 
 
 class NotConnectedError(MqttException):
-    pass
+    """
+    Raised when a method is called when a connection
+    is required but not present
+    """
 
 
 class QueueFullError(MqttException):
-    pass
+    """
+    Raised when send buffer is full
+    """

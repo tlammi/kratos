@@ -6,5 +6,5 @@ all the clients
 
 """
 
-from .__mqttengine import engine
+from .__mqttengine import engine, topic_handler
 from .exceptions import *
