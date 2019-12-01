@@ -141,8 +141,8 @@ def topic_handler(*args, **kwargs):
     """
     Wrapper for topic handler decorator
 
-    :param args:
-    :param kwargs:
-    :return:
+    :param args: Arguments passed forward
+    :param kwargs: Keyword arguments passed forward
+    :return: Wrapper for topic handler
     """
     return ENGINE.topic_handler(*args, **kwargs)
