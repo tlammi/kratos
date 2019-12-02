@@ -116,7 +116,8 @@ class MqttEngine:
                 LOGGER.info("Successfully subscribed to topic %s", topic)
             elif result == mqtt.MQTT_ERR_NO_CONN:
                 raise exceptions.NotConnectedError("No connection established")
-            raise ValueError("Unknown return value from paho-mqtt")
+            else:
+                raise ValueError("Unknown return value from paho-mqtt")
 
     def _disconnect_cb(self, client, userdata, rc):
         LOGGER.info("Disconnected")
