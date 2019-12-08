@@ -40,20 +40,32 @@ TBA
 
 
 ## Topic Hierarchy
+Topics are organized in decreasing genertity. For example `log/<level>/<unit>`, where log is the most generic part,
+then the log level and finally the unit from which the log originates from. Additionally topics matching filter
+`$/SYS/#` are reserved for functionality abstracted by MqttEngine and should not be accessed from application level.
 
+### Generic Topics
+
+- `$SYS/log/<level>/<unit>` - Logs with log level \<level\> produced by unit \<unit\>
+- `$SYS/heartbeat/<unit>` - Heartbeat (timestamp) of unit \<unit\>
+- `$SYS/config/<unit>` - Configuration passed from another program to an unit, for MqttEngine
+- `config/<unit>` - Configuration passed from another program to an unit, accessible for application
 
 ### Weightlifting / Power Lifting Specific Topics
 
-- CurLifter
-  - Name
-  - LiftNumber
-- Clock
-  - Start
-  - Stop
-  - Time
-  - RefreshTime
-- JudgeVote
-  - JudgeL
-  - JudgeM
-  - JudgeR
-  - VotingEnabled
+- `clock/start` - Used for starting a clock unit
+- `clock/stop` - Used for stopping a clock unit
+- `clock/time/set`- Used for setting the current time
+- `clock/time/current` - Used for getting the current time from the unit
+- `clock/time/refresh` - Used to tell clock unit to publish the current time to `clock/time/current`
+- `clock/expired` - Used for publishing clock expiriration event
+- `lifter/current/name/first` - Used for storing the lifter's first name
+- `lifter/current/name/family` - Used for storing the lifter's family name
+- `lifter/current/barweight` - Weight loaded into the bar
+- `lifter/current/liftnumber` - Number of the current lift
+- `lifter/next/barweight`- Used for posting the next bar load for the loaders etc.
+- `judge/vote/left` - Vote of the left judge (POV of lifter)
+- `judge/vote/middle` - Vote of the middle judge (POV of lifter)
+- `judge/vote/right` - Vote of the right judge (POV of lifter)
+- `judge/vote/enable` - Used for enabling voting
+- `judge/vote/disable` - Used for disabling voting
