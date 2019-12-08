@@ -5,7 +5,7 @@ import enum
 import time
 
 
-class Window:
+class OutWindow:
 
     def __init__(self, win, x: int, y: int, w: int, h: int):
         self._win = win
@@ -30,4 +30,10 @@ class Window:
         self._win.erase()
         for i, l in enumerate(self._buf):
             self._win.addstr(i, 0, l, curses.color_pair(color_index))
+        self._win.refresh()
+
+    def clear(self):
+        self._buf = [""]*self._dims[1]
+        self._cur_line = 0
+        self._win.erase()
         self._win.refresh()

@@ -28,6 +28,7 @@ class PromptWindow:
         self._win = curses_win
         self._buf = ""
         self._command_root = commandnode.CommandNode(None)
+        self._default_cmd = ""
 
     @classmethod
     def from_coords(cls, x: int, y: int, w: int):
@@ -36,6 +37,9 @@ class PromptWindow:
     @property
     def command_root(self):
         return self._command_root
+
+    def set_default_command(self, default_command: str):
+        self._default_cmd = default_command
 
     def control_prompt(self):
         while True:
@@ -53,6 +57,9 @@ class PromptWindow:
                 self._buf = ""
                 self._win.erase()
                 self._win.refresh()
+            elif self._default_cmd in self._command_root.subcommands():
+                self._command_root.call([self._default_cmd])
+
 
         def handle_tab():
             self._buf = " ".join(self._command_root.autocomplete(self._buf.split()))
