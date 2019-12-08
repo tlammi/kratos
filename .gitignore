@@ -1,1 +1,6 @@
+# Byte code
 *.pyc
+
+# Coverage reports
+htmlcov/*
+.coverage
