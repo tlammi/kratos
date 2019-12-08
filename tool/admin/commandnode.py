@@ -8,8 +8,8 @@ class CommandNode:
         self._cb = handler
         self._subcmds = {}
 
-    def add_sub_command(self, command_str: str, command_node):
-        self._subcmds[command_str] = command_node
+    def add_sub_command(self, command_str: str, sub_handler: typing.Union[None, callable]):
+        self._subcmds[command_str] = CommandNode(sub_handler)
         return self._subcmds[command_str]
 
     def autocomplete(self, cmd_list: list):
@@ -24,11 +24,13 @@ class CommandNode:
 
         count = 0
         match = ""
-        for cmdstr in curcmd._subcmds:
-            if cmdstr.startswith(cmd_list[-1]):
-                count += 1
-                match = cmdstr
-
+        try:
+            for cmdstr in curcmd._subcmds:
+                if cmdstr.startswith(cmd_list[-1]):
+                    count += 1
+                    match = cmdstr
+        except IndexError:
+            return cmd_list
         if count == 1 and match:
             return cmd_list[:-1] + [match]
         return cmd_list

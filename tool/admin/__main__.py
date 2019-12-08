@@ -4,6 +4,9 @@ import promptwindow
 import curses
 
 
+def mqtt_handler(*args):
+    print("cb: ", args)
+
 def main(stdscr):
     TERM_WIDTH = curses.COLS
     TERM_HEIGHT = curses.LINES
@@ -12,6 +15,8 @@ def main(stdscr):
     separator = window.Window.from_coords(0, TERM_HEIGHT - 2, TERM_WIDTH, 1)
     inwin = promptwindow.PromptWindow.from_coords(0, TERM_HEIGHT-1, TERM_WIDTH)
 
+    mqtt = inwin.command_root.add_sub_command("mqtt", None)
+    mqtt.add_sub_command("connect", mqtt_handler)
     separator.add_line(" "*(TERM_WIDTH-1), 1)
 
     while True:

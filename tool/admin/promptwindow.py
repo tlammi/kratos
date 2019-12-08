@@ -2,6 +2,7 @@
 import enum
 import curses
 import exceptions
+import commandnode
 
 
 class ControlKey(enum.Enum):
@@ -26,10 +27,15 @@ class PromptWindow:
     def __init__(self, curses_win):
         self._win = curses_win
         self._buf = ""
+        self._command_root = commandnode.CommandNode(None)
 
     @classmethod
     def from_coords(cls, x: int, y: int, w: int):
         return cls(curses.newwin(1, w, y, x))
+
+    @property
+    def command_root(self):
+        return self._command_root
 
     def control_prompt(self):
         while True:
@@ -47,6 +53,12 @@ class PromptWindow:
             self._win.erase()
             self._win.refresh()
             return res
+
+        def handle_tab():
+            self._buf = " ".join(self._command_root.autocomplete(self._buf.split()))
+            self._win.erase()
+            self._win.addstr(0, 0, self._buf)
+            self._win.refresh()
 
         def handle_ctrl_keys(key: ControlKey):
             if key == ControlKey.KEY_ESC:
@@ -81,6 +93,8 @@ class PromptWindow:
             #print("buf:",c)
             if c == (ord('\n'),):
                 return handle_enter()
+            if c == (ord('\t'),):
+                handle_tab()
             elif c in self.CONTROL_KEYS:
                 ctrl = self.CONTROL_KEYS[c]
                 handle_ctrl_keys(ctrl)
