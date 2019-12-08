@@ -7,12 +7,22 @@ class CommandNode:
     def __init__(self, handler: typing.Union[None, callable], *uargs, **ukwargs):
         self._cb = handler
         self._subcmds = {}
+        self._help_strs = {}
         self._uargs = uargs
         self._ukwargs = ukwargs
 
-    def add_sub_command(self, command_str: str, sub_handler: typing.Union[None, callable], *uargs, **ukwargs):
+    def add_sub_command(self, command_str: str, help_str: str, sub_handler: typing.Union[None, callable], *uargs, **ukwargs):
         self._subcmds[command_str] = CommandNode(sub_handler, *uargs, **ukwargs)
+        self._help_strs[command_str] = help_str
         return self._subcmds[command_str]
+
+    def subcommands_and_helps(self):
+        return self._help_strs
+
+    def set_handler(self, handler: typing.Union[None, callable], *uargs, **ukwargs):
+        self._uargs = uargs
+        self._ukwargs = ukwargs
+        self._cb = handler
 
     def autocomplete(self, cmd_list: list):
         curcmd = self
