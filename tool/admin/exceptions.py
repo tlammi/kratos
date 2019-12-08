@@ -1,0 +1,4 @@
+
+
+class ModeChange(Exception):
+    pass
