@@ -49,6 +49,14 @@ class Window:
             c = self.next_key()
             print(c)
             if c in self.CONTROL_KEY_MAPPINGS:
+                # y, x = self._win.getyx()
+                # if x >= len(self._buf):
+                #     self._buf += bytes(c).decode()
+                # else:
+                #     self._buf = self._buf[:x] + bytes(c).decode() + self._buf[x:]
+                # self._win.addstr(0, 0, self._buf)
+                # self._win.move(y, x+1)
+                # self._win.refresh()
                 ctrl = self.CONTROL_KEY_MAPPINGS[c]
                 if ctrl == InputType.KEY_ESC:
                     raise ModeChange()
