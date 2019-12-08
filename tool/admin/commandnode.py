@@ -4,12 +4,14 @@ import typing
 
 class CommandNode:
 
-    def __init__(self, handler: typing.Union[None, callable]):
+    def __init__(self, handler: typing.Union[None, callable], *uargs, **ukwargs):
         self._cb = handler
         self._subcmds = {}
+        self._uargs = uargs
+        self._ukwargs = ukwargs
 
-    def add_sub_command(self, command_str: str, sub_handler: typing.Union[None, callable]):
-        self._subcmds[command_str] = CommandNode(sub_handler)
+    def add_sub_command(self, command_str: str, sub_handler: typing.Union[None, callable], *uargs, **ukwargs):
+        self._subcmds[command_str] = CommandNode(sub_handler, *uargs, **ukwargs)
         return self._subcmds[command_str]
 
     def autocomplete(self, cmd_list: list):
@@ -41,6 +43,5 @@ class CommandNode:
         for index, cmdstr in enumerate(command_list):
             if cmdstr in curcmd._subcmds:
                 curcmd = curcmd._subcmds[cmdstr]
-            else:
-                arg_start_index = index
-        curcmd._cb(" ".join(command_list[arg_start_index:]))
+                arg_start_index = index+1
+        curcmd._cb(" ".join(command_list[arg_start_index:]), *curcmd._uargs, **curcmd._ukwargs)

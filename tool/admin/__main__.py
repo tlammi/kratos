@@ -7,6 +7,10 @@ import curses
 def mqtt_handler(*args):
     print("cb: ", args)
 
+
+def echo_handler(argstr, outwin: window.Window):
+    outwin.add_line(argstr)
+
 def main(stdscr):
     TERM_WIDTH = curses.COLS
     TERM_HEIGHT = curses.LINES
@@ -17,11 +21,12 @@ def main(stdscr):
 
     mqtt = inwin.command_root.add_sub_command("mqtt", None)
     mqtt.add_sub_command("connect", mqtt_handler)
+    inwin.command_root.add_sub_command("echo", echo_handler, outwin)
     separator.add_line(" "*(TERM_WIDTH-1), 1)
 
     while True:
         s = inwin.command_prompt()
-        outwin.add_line(s)
+        #outwin.add_line(s)
 
 if __name__ == "__main__":
     curses.wrapper(main)

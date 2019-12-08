@@ -48,11 +48,15 @@ class PromptWindow:
 
     def command_prompt(self):
         def handle_enter():
-            res = self._buf
+            # res = self._buf
+            # self._buf = ""
+            # self._win.erase()
+            # self._win.refresh()
+            # return res
+            self._command_root.call(self._buf.split())
             self._buf = ""
             self._win.erase()
             self._win.refresh()
-            return res
 
         def handle_tab():
             self._buf = " ".join(self._command_root.autocomplete(self._buf.split()))
