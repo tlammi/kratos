@@ -7,6 +7,7 @@ import logging
 import paho.mqtt.client as mqtt
 
 from . import exceptions
+from . import mqttstreamhandler
 
 LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +66,34 @@ class MqttEngine:
             self._handlers[topic_filter] = func
             return func
         return topic_handler_wrapper
+
+    def stream_handler(self):
+        """
+        Stream handler that can be passed to logging.Logger
+
+        StreamHandler reads logging output and passes the logs
+        to the correct MQTT topics. The log levels etc. are
+        managed internally by the engine.
+
+        Note that min log level received by the logger is max
+        of logger and stream handler log levels, i.e. if loggers
+        min log level is INFO, that is also the min log level of
+        a handler with log level of DEBUG.
+
+        Usage:
+
+        handler = mqttengine.engine().stream_handler()
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
+
+        :return: MqttStreamHandler instance wich publishes logs to MQTT
+        """
+        handler = mqttstreamhandler.MqttStreamHandler(self)
+        # TODO: Replace this with some other logic
+        #       once config can be passed via MQTT
+        handler.setLevel(logging.DEBUG)
+        return handler
 
     def exec(self):
         """
