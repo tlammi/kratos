@@ -55,6 +55,7 @@ class MqttEngine:
         """
         def topic_handler_wrapper(func: callable):
             self._handlers[topic_filter] = func
+            return func
         return topic_handler_wrapper
 
     def exec(self):
@@ -103,9 +104,11 @@ class MqttEngine:
             res.wait_for_publish()
             return
         if res.rc == mqtt.MQTT_ERR_NO_CONN:
-            raise exceptions.NotConnectedError("Could not publish to topic %s" % topic)
+            raise exceptions.NotConnectedError(
+                "Could not publish to topic %s" % topic)
         if res.rc == mqtt.MQTT_ERR_QUEUE_SIZE:
-            raise exceptions.QueueFullError("Send buffer is full, cannot publish.")
+            raise exceptions.QueueFullError(
+                "Send buffer is full, cannot publish.")
         raise ValueError("Unknown result code from paho-mqtt: %s" % res.rc)
 
     def _connect_cb(self, client, userdata, flags, rc):
