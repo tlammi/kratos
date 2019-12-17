@@ -46,6 +46,14 @@ class MqttEngine:
         """
         self._client.disconnect()
 
+    def set_user_data(self, userdata):
+        """
+        Updates the userdata argument passsed to callbacks
+
+        :param userdata: Data passed to callbacks
+        """
+        self._client.user_data_set(userdata)
+
     def topic_handler(self, topic_filter: str):
         """
         Decorator for adding topic handler
