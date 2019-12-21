@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-A script for running pylint
+A script for running pytest
 """
 import os
 import sys
@@ -15,7 +15,7 @@ PYTEST_ARGS = ["--cov=%s/../kratos" % THISDIR,
                "--cov-config=%s/covrc" % THISDIR,
                "%s/../kratos" % THISDIR]
 
-# Modify path to get non-relative imports right
+# Modify path to get imports correct
 sys.path.insert(0, os.path.join(THISDIR, "../kratos"))
 
 

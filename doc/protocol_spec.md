@@ -42,13 +42,13 @@ TBA
 ## Topic Hierarchy
 Topics are organized in decreasing genertity. For example `log/<level>/<unit>`, where log is the most generic part,
 then the log level and finally the unit from which the log originates from. Additionally topics matching filter
-`$/SYS/#` are reserved for functionality abstracted by MqttEngine and should not be accessed from application level.
+`$/ENGINE/#` are reserved for functionality abstracted by MqttEngine and should not be accessed from application level.
 
 ### Generic Topics
 
-- `$SYS/log/<level>/<unit>` - Logs with log level \<level\> produced by unit \<unit\>
-- `$SYS/heartbeat/<unit>` - Heartbeat (timestamp) of unit \<unit\>
-- `$SYS/config/<unit>` - Configuration passed from another program to an unit, for MqttEngine
+- `$ENGINE/log/<level>/<unit>` - Logs with log level \<level\> produced by unit \<unit\>
+- `$ENGINE/heartbeat/<unit>` - Heartbeat (timestamp) of unit \<unit\>
+- `$ENGINE/config/<unit>` - Configuration passed from another program to an unit, for MqttEngine
 - `config/<unit>` - Configuration passed from another program to an unit, accessible for application
 
 ### Weightlifting / Power Lifting Specific Topics
