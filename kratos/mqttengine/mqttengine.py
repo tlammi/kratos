@@ -3,11 +3,15 @@ MQTT Engine implementation
 """
 
 import logging
+import threading
+import time
 
 import paho.mqtt.client as mqtt
 
 from . import exceptions
 from . import mqttstreamhandler
+from . import mqttengineconfig
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,6 +25,20 @@ class MqttEngine:
         self._handlers = {}
         self._client = mqtt.Client()
         self._keepalive_s = 0
+        self._config = mqttengineconfig.MqttEngineConfig()
+        self._hb_thread = None
+        self._hb_thread_enabled = True
+
+    def configure(self, config: mqttengineconfig.MqttEngineConfig):
+        """
+        Modify MqttEngine cofiguration
+
+        Should be called before connect()
+
+        :param config: New config for the engine
+        """
+        self._config = config
+        self._client.user_data_set(config.userdata)
 
     def connect(self, broker: str, port=1883, keepalive_s=60, bind_addr=""):
         """
@@ -32,6 +50,11 @@ class MqttEngine:
         :param bind_addr: Bind connection to local IP
         :return: None
         """
+        self._hb_thread = threading.Thread(
+            target=self._heartbeat_thread_func,
+            args=("$ENGINE/heartbeat/%s" % self._config.unit_name,),
+            daemon=True)
+
         self._client.on_message = self._msg_cb
         self._client.on_connect = self._connect_cb
         for filt, cb in self._handlers.items():
@@ -46,14 +69,6 @@ class MqttEngine:
         :return:
         """
         self._client.disconnect()
-
-    def set_user_data(self, userdata):
-        """
-        Updates the userdata argument passsed to callbacks
-
-        :param userdata: Data passed to callbacks
-        """
-        self._client.user_data_set(userdata)
 
     def topic_handler(self, topic_filter: str):
         """
@@ -89,10 +104,9 @@ class MqttEngine:
 
         :return: MqttStreamHandler instance wich publishes logs to MQTT
         """
-        handler = mqttstreamhandler.MqttStreamHandler(self)
-        # TODO: Replace this with some other logic
-        #       once config can be passed via MQTT
-        handler.setLevel(logging.DEBUG)
+        handler = mqttstreamhandler.MqttStreamHandler(
+            self, self._config.unit_name)
+        handler.setLevel(self._config.loglevel)
         return handler
 
     def exec(self):
@@ -100,6 +114,9 @@ class MqttEngine:
         Execute the engine. Never returns
         :return:
         """
+        if self._config.send_heartbeat:
+            self._hb_thread_enabled = True
+            self._hb_thread.start()
         self._client.loop_forever()
 
     def start(self):
@@ -109,6 +126,9 @@ class MqttEngine:
         :return: None
         """
         self._client.loop_start()
+        if self._config.send_heartbeat:
+            self._hb_thread_enabled = True
+            self._hb_thread.start()
 
     def stop(self):
         """
@@ -116,6 +136,9 @@ class MqttEngine:
 
         :return: None
         """
+        if self._config.send_heartbeat:
+            self._hb_thread_enabled = False
+            self._hb_thread.join()
         self._client.loop_stop()
 
     def publish(self, topic: str, payload=None, qos=0, retain=False):
@@ -164,6 +187,16 @@ class MqttEngine:
 
     def _msg_cb(self, client, userdata, msg):
         LOGGER.debug("Message from topic: %s", msg.topic)
+
+    def _heartbeat_thread_func(self, heartbeat_topic: str):
+        """
+        Thread function for postin heartbeats
+
+        """
+        while self._hb_thread_enabled:
+            self._client.publish(
+                heartbeat_topic, str(time.time()), retain=True)
+            time.sleep(self._config.heartbeat_interval_s)
 
 
 ENGINE = MqttEngine()

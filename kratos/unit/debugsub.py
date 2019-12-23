@@ -55,9 +55,11 @@ def run(args: argparse.Namespace) -> None:
     """
     Entrypoint
     """
-    mqtt.engine().set_user_data((args.include, args.exclude))
 
     logging.basicConfig(format="%(message)s")
     LOGGER.setLevel(logging.DEBUG)
+    mqtt.engine().configure(
+        mqtt.MqttEngineConfig("debugsub", (args.include, args.exclude))
+    )
     mqtt.engine().connect(args.address, args.port, bind_addr=args.bind)
     mqtt.engine().exec()
