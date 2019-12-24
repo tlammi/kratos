@@ -7,6 +7,7 @@ import typing
 from dataclasses import dataclass
 
 import unit.debugsub
+import unit.judge
 
 
 @dataclass
@@ -18,7 +19,9 @@ class Unit:
 
 UNITS = {
     "debugsub": Unit(unit.debugsub.add_cli_args, unit.debugsub.run,
-                     "Run debug client for monitoring MQTT traffic.")
+                     "Run debug client for monitoring MQTT traffic."),
+    "judge": Unit(unit.judge.add_cli_args, unit.judge.run,
+                  "Run judge unit")
 }
 
 

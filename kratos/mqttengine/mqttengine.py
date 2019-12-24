@@ -57,7 +57,10 @@ class MqttEngine:
 
         self._client.on_message = self._msg_cb
         self._client.on_connect = self._connect_cb
-        for filt, cb in self._handlers.items():
+
+        if self._config.unit_name not in self._handlers:
+            self._handlers[self._config.unit_name] = {}
+        for filt, cb in self._handlers[self._config.unit_name].items():
             self._client.message_callback_add(filt, cb)
         self._keepalive_s = keepalive_s
         self._client.connect(broker, port, keepalive_s, bind_addr)
@@ -70,15 +73,18 @@ class MqttEngine:
         """
         self._client.disconnect()
 
-    def topic_handler(self, topic_filter: str):
+    def topic_handler(self, topic_filter: str, unit_name: str):
         """
         Decorator for adding topic handler
 
         :param topic_filter: Topic filter used for matching messages
+        :param unit_name: Unit for which the handler is registered
         :return: Wrapper for the callback
         """
         def topic_handler_wrapper(func: callable):
-            self._handlers[topic_filter] = func
+            if unit_name not in self._handlers:
+                self._handlers[unit_name] = {}
+            self._handlers[unit_name][topic_filter] = func
             return func
         return topic_handler_wrapper
 
@@ -173,7 +179,7 @@ class MqttEngine:
 
     def _connect_cb(self, client, userdata, flags, rc):
         LOGGER.info("Connected with result code %s", rc)
-        for topic in self._handlers:
+        for topic in self._handlers[self._config.unit_name]:
             result, mid = client.subscribe(topic)
             if result == mqtt.MQTT_ERR_SUCCESS:
                 LOGGER.info("Successfully subscribed to topic %s", topic)

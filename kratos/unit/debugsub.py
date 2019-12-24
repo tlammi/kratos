@@ -9,8 +9,8 @@ import util
 LOGGER = logging.getLogger(__name__)
 
 
-@mqtt.topic_handler("$ENGINE/#")
-@mqtt.topic_handler("#")
+@mqtt.topic_handler("$ENGINE/#", "debugsub")
+@mqtt.topic_handler("#", "debugsub")
 def printer(_client, userdata, msg):
     """
     Printer callback for received messages
