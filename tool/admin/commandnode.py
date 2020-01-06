@@ -57,4 +57,15 @@ class CommandNode:
             if cmdstr in curcmd._subcmds:
                 curcmd = curcmd._subcmds[cmdstr]
                 arg_start_index = index+1
-        curcmd._cb(" ".join(command_list[arg_start_index:]), *curcmd._uargs, **curcmd._ukwargs)
+        try:
+            curcmd._cb(" ".join(command_list[arg_start_index:]), *curcmd._uargs, **curcmd._ukwargs)
+        except TypeError:
+            raise InvalidCommandException("Invalid command: %s" % " ".join(command_list))
+
+
+class CommandException(Exception):
+    pass
+
+
+class InvalidCommandException(CommandException):
+    pass

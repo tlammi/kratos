@@ -42,24 +42,24 @@ class PromptWindow:
         self._default_cmd = default_command
 
     def control_prompt(self):
-        while True:
-            c = self.next_key()
+        c = self.next_key()
 
-            if c in self.CONTROL_KEYS:
-                ctrl = self.CONTROL_KEYS[c]
-                if ctrl == ControlKey.KEY_ESC:
-                    raise exceptions.ModeChange()
+        if c in self.CONTROL_KEYS:
+            ctrl = self.CONTROL_KEYS[c]
+            if ctrl == ControlKey.KEY_ESC:
+                raise exceptions.ModeChange()
 
     def command_prompt(self):
         def handle_enter():
             if self._buf:
-                self._command_root.call(self._buf.split())
-                self._buf = ""
-                self._win.erase()
-                self._win.refresh()
+                try:
+                    self._command_root.call(self._buf.split())
+                finally:
+                    self._buf = ""
+                    self._win.erase()
+                    self._win.refresh()
             elif self._default_cmd in self._command_root.subcommands():
                 self._command_root.call([self._default_cmd])
-
 
         def handle_tab():
             self._buf = " ".join(self._command_root.autocomplete(self._buf.split()))
@@ -95,18 +95,18 @@ class PromptWindow:
             self._win.move(y, x+1)
             self._win.refresh()
 
-        while True:
-            c = self.next_key()
-            #print("buf:",c)
-            if c == (ord('\n'),):
-                return handle_enter()
-            if c == (ord('\t'),):
-                handle_tab()
-            elif c in self.CONTROL_KEYS:
-                ctrl = self.CONTROL_KEYS[c]
-                handle_ctrl_keys(ctrl)
-            else:
-                handle_default(c)
+        c = self.next_key()
+        #print("buf:",c)
+        if c == (ord('\n'),):
+            handle_enter()
+            return
+        if c == (ord('\t'),):
+            handle_tab()
+        elif c in self.CONTROL_KEYS:
+            ctrl = self.CONTROL_KEYS[c]
+            handle_ctrl_keys(ctrl)
+        else:
+            handle_default(c)
 
     def next_key(self):
         buf = []

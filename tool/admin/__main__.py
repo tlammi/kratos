@@ -2,6 +2,7 @@
 import outwindow
 import promptwindow
 import commandnode
+import exceptions
 import curses
 
 
@@ -65,7 +66,12 @@ def main(stdscr):
     separator.add_line(" "*(TERM_WIDTH-1), 1)
 
     while True:
-        s = inwin.command_prompt()
+        try:
+            inwin.command_prompt()
+        except commandnode.InvalidCommandException as err:
+            outwin.add_line(str(err))
+        except exceptions.ModeChange:
+            outwin.add_line("Pressing ESC will eventually change the program mode")
 
 
 if __name__ == "__main__":
