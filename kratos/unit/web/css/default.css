@@ -1,5 +1,6 @@
 body {
-    scale: 2
+	scale: 1;
+	height: 100%
 }
 
 /* Toolchain placed at the top of the page*/
@@ -39,7 +40,6 @@ body {
 	width: 100%;
 	margin-top: 200px;
 	background-color: pink;
-	
 }
 
 .tabholder .tab {
