@@ -29,3 +29,43 @@ def mqtt_match(topic_filter: str, topic: str):
             return False
 
     return True
+
+
+def xml_wrap(tag: str, text: str, attrs: list = None):
+    """
+    Generate xml tag strings
+
+    :param tag: Tag name
+    :param text: Text inside the element
+    :param attrs: XML attributes
+    :return: Generated string
+    """
+    attrs = attrs or []
+    attrstr = " ".join(attrs)
+    if text:
+       return f"<{tag} {attrstr}>{text}</{tag}>"
+    return f"<{tag} {attrstr}/>"
+
+
+def to_html_table(header: list, values: list):
+    """
+    Converts header and values to html table presentation
+
+    :param header: Header row
+    :param values: List of lists (or similar) containing the data
+    :return: HTML table as string
+    """
+    headerstr = "".join([xml_wrap("th", i) for i in header])
+    headerstr = xml_wrap("tr", headerstr)
+    headerstr = xml_wrap("thead", headerstr)
+
+    datastr = ""
+    for row in values:
+        tmp = "".join([xml_wrap("td", elem) for elem in row])
+        tmp = xml_wrap("tr", tmp)
+        datastr += tmp
+
+    datastr = xml_wrap("tbody", datastr)
+
+    return xml_wrap("table", headerstr+datastr)
+

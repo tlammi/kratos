@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 import unit.debugsub
 import unit.judge
+import unit.web
 
 
 @dataclass
@@ -21,7 +22,8 @@ UNITS = {
     "debugsub": Unit(unit.debugsub.add_cli_args, unit.debugsub.run,
                      "Run debug client for monitoring MQTT traffic."),
     "judge": Unit(unit.judge.add_cli_args, unit.judge.run,
-                  "Run judge unit")
+                  "Run judge unit"),
+    "webserver": Unit(unit.web.add_cli_args, unit.web.run, "Run web server")
 }
 
 

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+	
+	<div class="toolchain">
+		<div class="headerholder">
+		<h1>kratos</h1>
+		</div>
+		<div class="tabbuttonholder">
+		<button onclick="opentab(event, 'starttab')">Create or Load a Competition</button>
+		<button onclick="opentab(event, 'settingstab')">Settings</button>
+		<button onclick="opentab(event, 'competitorstab')">Manage Competitors</button>
+		<button onclick="opentab(event, 'competitiontab')">Manage Competition</button>
+		</div>
+		<div class="toolholder">
+		Tools here
+		</div>
+	</div>
+	<div class="tabholder">
+	<div id="starttab" class="tab">
+	Tools for creating and loading competitions here
+	<div class="tableholder" id="competition_list_table">
+	</div>
+	</div>
+	<div id="settingstab" class="tab">
+	<h2>404</h2>
+	Tools for managing competition settings here
+	</div>
+	<div id="competitorstab", class="tab">
+	Tools for adding/removing/editing competitors here
+	<div class="tableholder" id="competitor_table">
+	</div>
+	</div>
+	<div id="competitiontab", class="tab">
+	Tools for managing an active competition here
+	<div class="tableholder" id="current_competition_table">
+	</div>
+	</div>
+	</div>
+
+	
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+	
+		function load_table(id, uri){
+			var tableref = document.getElementById(id);
+			var req = new XMLHttpRequest();
+			req.open("GET", uri, false);
+			req.send(null);
+			tableref.innerHTML = req.responseText;
+		}
+		function loadtables() {
+			load_table("competition_list_table", "tables/competitions");
+			load_table("competitor_table", "tables/competitors");
+			load_table("current_competition_table", "tables/current_competition");
+		}
+		
+		window.onload = loadtables();
+		// Handles tab button press by opening a corresponding tab
+		function opentab(event, tabname) {
+		
+			function hide_tabs() {
+				var tabs = document.getElementsByClassName("tab");
+				for (var i=0; i < tabs.length; i++){
+					tabs[i].style.display="none";
+				}
+			}
+			
+			function reset_tabbuttons(){
+				var tabbuttons = document.getElementsByClassName("toolchain")[0]
+										 .getElementsByClassName("tabbuttonholder")[0]
+										 .getElementsByTagName("button");
+				
+				for(var i=0; i < tabbuttons.length; i++){
+					tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+				}
+				
+			}
+			
+			function show_tab(tabname){
+				document.getElementById(tabname).style.display = "block";
+			}
+			
+			function activate_button(targetbutton){
+				targetbutton.className += " active";
+			}
+			
+			hide_tabs();
+			reset_tabbuttons();
+			show_tab(tabname);
+			activate_button(event.currentTarget);
+		}
+
+        $("#MyTable tbody tr").click(function () {
+            $(this).addClass("selected").siblings().removeClass("selected")
+        });
+        $("#MyTable tr td").keypress(function (event) {
+            if (event.which === 13) {
+                var x = this.cellIndex;
+                var y = this.parentNode.rowIndex;
+                var text = $(this).text()
+                $.post("/postcell", {
+                    "x": x,
+                    "y": y,
+                    "text": text
+                })
+                console.log("Enter pressed: (" + x + ", " + y + ")" + " " + text);
+                return false;
+            }
+        });
+
+        function add_lifter() {
+            console.log("Add lifter pressed");
+            $.post("/postnewline")
+        };
+
+        function remove_lifter() {
+            var selected_line = document.getElementsByClassName("selected")[0]
+            if (selected_line) {
+                console.log("Remove lifter pressed: " + selected_line.rowIndex);
+                $.post("/postpopline", {
+                    "index": selected_line.rowIndex
+                });
+            }
+        };
+    </script>
+</body>
+
+</html>
