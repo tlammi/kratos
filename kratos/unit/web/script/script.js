@@ -25,7 +25,6 @@ function start(){
     }
 }
 
-window.onload = start();
 // Handles tab button press by opening a corresponding tab
 function opentab(event, tabname) {
     function hide_tabs() {
@@ -59,6 +58,25 @@ function opentab(event, tabname) {
     show_tab(tabname);
     activate_button(event.currentTarget);
 }
+
+start();
+
+let ws = new WebSocket("ws://localhost:8080/websocket");
+ws.onopen = function() {
+    console.log("WebSocket opened");
+};
+ws.onmessage = function(event) {
+    let starttab = document.getElementById("starttab");
+    starttab.innerHTML += event.data;
+    console.log("WebSocket message received");
+};
+ws.onerror = function() {
+    console.error("WebSocket error occurred");
+};
+ws.onclose = function() {
+    console.log("WebSocket connection closed")
+};
+ws.send("Hello, world")
 
 $("#MyTable tbody tr").click(function () {
     $(this).addClass("selected").siblings().removeClass("selected")

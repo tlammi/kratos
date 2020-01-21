@@ -3,9 +3,13 @@ import bottle
 import os
 import datetime
 import logging
-
 import sql
 import util
+import time
+import gevent.monkey
+import gevent.pywsgi
+import geventwebsocket
+
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 HTML_DIR = os.path.join(THISDIR, "html")
@@ -70,6 +74,25 @@ def serve_tables(tablename: str, client: sql.Client):
 
     return f"<h2>This will contain table &lt;{tablename}&gt;</h2>"
 
+def serve_websocket():
+    """
+    Serves websocket connection.
+
+    The connection is disconnected once the function returns.
+
+    :return: None
+    """
+    wsock = bottle.request.environ.get("wsgi.websocket")
+    if not wsock:
+        bottle.abort(400, "Expected WebSocket request.")
+    while True:
+        try:
+            time.sleep(5)
+            wsock.send("This is a WebSocketEvent.<br>")
+        except geventwebsocket.WebSocketError:
+            break
+
+
 
 def add_cli_args(_parser: argparse.ArgumentParser):
     """
@@ -88,11 +111,17 @@ def run(args: argparse.Namespace):
     :return: None
     """
     client = sql.Client("sqlite:///:memory:")
-    client.competitions().append(Name="Kevät ranking 2020", CompetitionDate=datetime.date(2020, 3, 3))
-    client.competitions().append(Name="Syys ranking 2020", CompetitionDate=datetime.date(2020, 9, 3))
+    client.competitions().append(Name="Kevät ranking 2020",
+                                 CompetitionDate=datetime.date(2020, 3, 3))
+    client.competitions().append(Name="Syys ranking 2020",
+                                 CompetitionDate=datetime.date(2020, 9, 3))
     bottle.get(r"/css/<filename>")(serve_css)
     bottle.get("/")(serve_index)
     bottle.get("/favicon.ico")(serve_favicon)
     bottle.get(r"/tables/<tablename>")(lambda tablename: serve_tables(tablename, client))
     bottle.get(r"/script/<filename>")(serve_script)
-    bottle.run(host="localhost", port=8080, debug=True)
+    bottle.get(r"/websocket")(serve_websocket)
+
+    gevent.monkey.patch_all()  # Magic
+    bottle.run(server="gevent", host="localhost", port=8080,
+               debug=True, handler_class=geventwebsocket.handler.WebSocketHandler)
