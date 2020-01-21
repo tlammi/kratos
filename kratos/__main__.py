@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import unit.debugsub
 import unit.judge
 import unit.web
+import unit.platform
 
 
 @dataclass
@@ -24,6 +25,9 @@ UNITS = {
     "judge": Unit(unit.judge.add_cli_args, unit.judge.run,
                   "Run judge unit"),
     "webserver": Unit(unit.web.add_cli_args, unit.web.run, "Run web server")
+    "platform": Unit(unit.platform.add_cli_args, unit.platform.run,
+                     "Run platform screen for displaying the current lifter, "
+                     "judging results, attempt clock etc.")
 }
 
 
