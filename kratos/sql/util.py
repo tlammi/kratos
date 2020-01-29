@@ -25,4 +25,4 @@ def sql_result_to_header_and_rows(result):
     rows = result.fetchall()
     keys = result.keys()
 
-    return list(keys), rows
+    return list(keys), [list(r) for r in rows]

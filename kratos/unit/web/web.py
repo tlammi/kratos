@@ -6,9 +6,12 @@ import logging
 import sql
 import util
 import time
+import json
 import gevent.monkey
 import gevent.pywsgi
 import geventwebsocket
+
+from . import wshandler
 
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
@@ -74,26 +77,6 @@ def serve_tables(tablename: str, client: sql.Client):
 
     return f"<h2>This will contain table &lt;{tablename}&gt;</h2>"
 
-def serve_websocket():
-    """
-    Serves websocket connection.
-
-    The connection is disconnected once the function returns.
-
-    :return: None
-    """
-    wsock = bottle.request.environ.get("wsgi.websocket")
-    if not wsock:
-        bottle.abort(400, "Expected WebSocket request.")
-    while True:
-        try:
-            time.sleep(5)
-            wsock.send("This is a WebSocketEvent.<br>")
-        except geventwebsocket.WebSocketError:
-            break
-
-
-
 def add_cli_args(_parser: argparse.ArgumentParser):
     """
     Add CLI args
@@ -120,7 +103,8 @@ def run(args: argparse.Namespace):
     bottle.get("/favicon.ico")(serve_favicon)
     bottle.get(r"/tables/<tablename>")(lambda tablename: serve_tables(tablename, client))
     bottle.get(r"/script/<filename>")(serve_script)
-    bottle.get(r"/websocket")(serve_websocket)
+ #   bottle.get(r"/websocket")(serve_websocket)
+    bottle.get(r"/websocket")(lambda: wshandler.serve_websocket(client))
 
     gevent.monkey.patch_all()  # Magic
     bottle.run(server="gevent", host="localhost", port=8080,

@@ -3,6 +3,7 @@ Helper class for accessing SQL database
 """
 
 import sqlalchemy
+from sqlalchemy.sql.expression import func
 
 from . import util
 
@@ -52,7 +53,18 @@ class TableView:
         :return: The matching row
         """
         s = sqlalchemy.select([self._table]).where(getattr(self._table.c, self._index_col) == item)
-        return self._conn.execute(s).fetchall()[0]
+        return util.sql_result_to_dicts(self._conn.execute(s))[0]
+
+    def max_id(self):
+        """
+        Get the maximum ID in the table
+
+        Max ID is given to the element that is added to the table latest.
+
+        :return: Maximum ID
+        """
+        s = sqlalchemy.select([func.max(getattr(self._table.c, self._index_col))])
+        return self._conn.execute(s).fetchall()[0][0]
 
     def append(self, **kwargs):
         """
@@ -63,6 +75,13 @@ class TableView:
         """
         i = self._table.insert().values(**kwargs)
         self._conn.execute(i)
+
+    def update(self, id, **kwargs):
+        """
+        Update values in table
+        """
+        u = self._table.update().where(getattr(self._table.c, self._index_col)==id).values(**kwargs)
+        self._conn.execute(u)
 
     def where(self, expression: str):
         """
