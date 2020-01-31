@@ -43,7 +43,7 @@ def xml_wrap(tag: str, text: str, attrs: list = None):
     attrs = attrs or []
     attrstr = " ".join(attrs)
     if text:
-       return f"<{tag} {attrstr}>{text}</{tag}>"
+        return f"<{tag} {attrstr}>{text}</{tag}>"
     return f"<{tag} {attrstr}/>"
 
 
@@ -68,4 +68,3 @@ def to_html_table(header: list, values: list):
     datastr = xml_wrap("tbody", datastr)
 
     return xml_wrap("table", headerstr+datastr)
-

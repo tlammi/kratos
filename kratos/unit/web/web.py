@@ -1,12 +1,13 @@
+"""
+Main file and entrypoint for web unit
+"""
 import argparse
-import bottle
 import os
 import datetime
 import logging
+import bottle
 import sql
 import util
-import time
-import json
 import gevent.monkey
 import gevent.pywsgi
 import geventwebsocket
@@ -20,7 +21,9 @@ HTML_FILE = os.path.join(HTML_DIR, "index.html")
 
 
 LIFTER_TABLE_HEADERS = ["Last Name", "First Names", "Body Weight",
-                        "Snatch 1", "Snatch 2", "Snatch 3", "C&J 1", "C&J 2", "C&J 3", "Tot", "Sinclair"]
+                        "Snatch 1", "Snatch 2", "Snatch 3",
+                        "C&J 1", "C&J 2", "C&J 3",
+                        "Tot", "Sinclair"]
 
 LOGGER = logging.getLogger(__file__)
 
@@ -48,7 +51,7 @@ def serve_css(filename):
     :param filename: File in css/
     :return: String read from the file
     """
-    LOGGER.debug(f"serving {filename}")
+    LOGGER.debug("serving %s", filename)
     return bottle.static_file(filename, root=os.path.join(THISDIR, "css"))
 
 def serve_script(filename):
@@ -71,7 +74,7 @@ def serve_tables(tablename: str, client: sql.Client):
         Initialized before the function execution.
     :return: Table as HTML string
     """
-    LOGGER.debug(f"serving {tablename}")
+    LOGGER.debug("serving %s", tablename)
     if tablename == "competitions":
         return util.to_html_table(*client.competitions().to_header_and_rows())
 

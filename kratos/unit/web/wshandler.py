@@ -19,9 +19,11 @@ def handle_new_row(target: str, values: dict, client: sql.Client):
     :param client: SQL client used for accessing the database
     :return: Response string
     """
-    if(target == "competitions"):
+    if target == "competitions":
         if "CompetitionDate" in values:
-            values["CompetitionDate"] = datetime.datetime.strptime(values["CompetitionDate"], "%Y-%m-%d")
+            values["CompetitionDate"] = \
+                datetime.datetime.strptime(
+                    values["CompetitionDate"], "%Y-%m-%d")
         else:
             values["CompetitionDate"] = datetime.date.today()
         client.competitions().append(**values)
@@ -32,9 +34,11 @@ def handle_new_row(target: str, values: dict, client: sql.Client):
         # datetime.date does not serialize, but str does
         inserted_element["CompetitionDate"] = str(inserted_element["CompetitionDate"])
         return json.dumps(
-            {"event": "newRow", "target": "competitions", "values": inserted_element})
-    else:
-        raise ValueError("Non-supported target table %s", target)
+            {"event": "newRow",
+             "target": "competitions",
+             "values": inserted_element})
+
+    raise ValueError("Non-supported target table {}".format(target))
 
 def handle_get_table(target: str, client: sql.Client):
     """
@@ -44,7 +48,7 @@ def handle_get_table(target: str, client: sql.Client):
     :param client: SQL client
     :return: Response string
     """
-    if(target == "competitions"):
+    if target == "competitions":
         header, rows = client.competitions().to_header_and_rows()
         resp = {}
         resp["event"] = "getTable"
@@ -57,13 +61,14 @@ def handle_get_table(target: str, client: sql.Client):
         resp["rows"] = rows
         print(f"resp: {resp}")
         return json.dumps(resp)
+    raise ValueError(f"Unknown target: {target}")
 
-def handle_update_row(target: str, id: int, values: dict, client: sql.Client):
+def handle_update_row(target: str, elem_id: int, values: dict, client: sql.Client):
     """
     Handling function for row update
 
     :param target: Target table
-    :param id: ID of the element to target
+    :param elem_id: ID of the element to target
     :param values: Dict of values to insert. Non-specified values will be left unmodified
     :param client: SQL client
     """
@@ -71,26 +76,34 @@ def handle_update_row(target: str, id: int, values: dict, client: sql.Client):
         tmp = values.copy()
         if "CompetitionDate" in tmp:
             tmp["CompetitionDate"] = datetime.datetime.strptime(tmp["CompetitionDate"], "%Y-%m-%d")
-        client.competitions().update(id, **tmp)
+        client.competitions().update(elem_id, **tmp)
 
-    return json.dumps({"event": "rowModified", "target": "competitions", "id": id, "values": values})
+    return json.dumps(
+        {"event": "rowModified",
+         "target": "competitions",
+         "id": elem_id,
+         "values": values})
 
-def handle_rm_row(target: str, id: int, client: sql.Client):
+def handle_rm_row(target: str, elem_id: int, client: sql.Client):
     """
     Handling function for removing a table entry
 
     :param target: Target table
-    :param id: ID to remove
+    :param elem_id: ID to remove
     :param client: SQL client
     """
     if target == "competitions":
-        client.competitions().delete(id)
-        return json.dumps({"event": "rmRow", "target": "competitions", "id": id})
+        client.competitions().delete(elem_id)
+        return json.dumps(
+            {"event": "rmRow",
+             "target": "competitions",
+             "id": elem_id})
+    raise ValueError(f"Invalid target {target}")
 
 def serve_websocket(client: sql.Client):
     """
     Main function for serving websockets
-    
+
     :param client: SQL client
     """
     wsock = bottle.request.environ.get("wsgi.websocket")
@@ -109,7 +122,7 @@ def serve_websocket(client: sql.Client):
             else:
                 if json_request["event"] == "newRow":
                     wsock.send(handle_new_row(json_request["target"],
-                               json_request["values"], client))
+                                              json_request["values"], client))
                 elif json_request["event"] == "getTable":
                     wsock.send(handle_get_table(json_request["target"], client))
                 elif json_request["event"] == "rowModified":

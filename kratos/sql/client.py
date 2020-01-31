@@ -94,7 +94,7 @@ class Client:
                 cj2 AS (SELECT * FROM cjs WHERE Number = 2),
                 cj3 AS (SELECT * FROM cjs WHERE Number = 3),
                 flat_attempts AS (
-                    SELECT 
+                    SELECT
                         snatch1.CompetitorID as "CompetitorID",
                         snatch1.Status AS "Snatch1Status",
                         snatch1.Result AS "Snatch1Result",

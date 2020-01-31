@@ -1,4 +1,6 @@
-
+"""
+SQL utility functions
+"""
 
 def sql_result_to_dicts(result):
     """

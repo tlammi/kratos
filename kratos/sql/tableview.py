@@ -80,7 +80,8 @@ class TableView:
         """
         Update values in table
         """
-        u = self._table.update().where(getattr(self._table.c, self._index_col)==id).values(**kwargs)
+        u = self._table.update().where(
+            getattr(self._table.c, self._index_col) == id).values(**kwargs)
         self._conn.execute(u)
 
     def where(self, expression: str):
