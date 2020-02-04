@@ -24,7 +24,7 @@ UNITS = {
                      "Run debug client for monitoring MQTT traffic."),
     "judge": Unit(unit.judge.add_cli_args, unit.judge.run,
                   "Run judge unit"),
-    "webserver": Unit(unit.web.add_cli_args, unit.web.run, "Run web server")
+    "webserver": Unit(unit.web.add_cli_args, unit.web.run, "Run web server"),
     "platform": Unit(unit.platform.add_cli_args, unit.platform.run,
                      "Run platform screen for displaying the current lifter, "
                      "judging results, attempt clock etc.")
