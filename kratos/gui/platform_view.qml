@@ -238,51 +238,58 @@ Page {
                         anchors.fill: parent
 
                         Rectangle {
-                            id: leftJudgeDecision
+                            id: rightJudgeDecision
 
                             Layout.preferredHeight: parent.height / 2
                             Layout.preferredWidth: parent.width / 4
                             Layout.margins: 10
                             Layout.alignment: Qt.AlignLeft
 
-                            color: "red"
+                            color: "black"
                         }
 
                         Rectangle {
-                            id: centerJudgeDecision
+                            id: middleJudgeDecision
 
                             Layout.preferredHeight: parent.height / 2
                             Layout.preferredWidth: parent.width / 4
                             Layout.margins: 10
                             Layout.alignment: Qt.AlignHCenter
 
-                            color: "red"
+                            color: "black"
                         }
 
                         Rectangle {
-                            id: rightJudgeDecision
+                            id: leftJudgeDecision
 
                             Layout.preferredHeight: parent.height / 2
                             Layout.preferredWidth: parent.width / 4
                             Layout.margins: 10
                             Layout.alignment: Qt.AlignRight
 
-                            color: "red"
+                            color: "black"
                         }
 
                         Connections {
                             target: applicationData
 
                             onJudgingSet: {
-                                leftJudgeDecision.color = judging[0] ? "white" : "red"
-                                centerJudgeDecision.color = judging[1] ? "white" : "red"
-                                rightJudgeDecision.color = judging[2] ? "white" : "red"
+                                leftJudgeDecision.color =
+                                    judging[0] === "NA" ? "black" : judging[0] ? "white" : "red"
+                                middleJudgeDecision.color =
+                                    judging[1] === "NA" ? "black" : judging[1] ? "white" : "red"
+                                rightJudgeDecision.color =
+                                    judging[2] === "NA" ? "black" : judging[2] ? "white" : "red"
 
                                 bottom_stack.currentIndex = 1
                             }
 
                             onJudgingCleared: {
                                 bottom_stack.currentIndex = 0
+
+                                leftJudgeDecision.color = "black"
+                                middleJudgeDecision.color = "black"
+                                rightJudgeDecision.color = "black"
                             }
                         }
                     }

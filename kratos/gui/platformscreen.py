@@ -237,7 +237,11 @@ class PlatformData(QtCore.QObject):
 
     @minutes.setter
     def minutes(self, minutes: int):
-        self._minutes = str(minutes)
+        if minutes == None:
+            self._minutes = "-"
+        else:
+            self._minutes = str(minutes)
+
         self._minutesChanged.emit(self._minutes)
 
     _secondsChanged = QtCore.pyqtSignal(str,
@@ -257,7 +261,11 @@ class PlatformData(QtCore.QObject):
 
     @seconds.setter
     def seconds(self, seconds: int):
-        self._seconds = str(seconds) if seconds >= 10 else f"0{str(seconds)}"
+        if seconds == None:
+            self._seconds = "-"
+        else:
+            self._seconds = str(seconds) if seconds >= 10 else f"0{str(seconds)}"
+
         self._secondsChanged.emit(self._seconds)
 
     _judgingSet = QtCore.pyqtSignal(list,
@@ -267,28 +275,33 @@ class PlatformData(QtCore.QObject):
 
     def get_judging(self):
         """
-        Get the currently set judging result
+        Get the currently set judging result.
 
         True represents a "good lift" and False "no-lift". Directions are as seen from the judges.
 
-        :return: None or a tuple containing the results (left, center, right)
+        :return: None or a tuple containing the results (left, middle, right)
         """
 
         return self._judging
 
-    def set_judging(self, left: bool, center: bool, right: bool):
+    def set_judging(self, left: bool=None, middle: bool=None, right: bool=None):
         """
-        Display judging results
+        Display judging results.
 
-        True represents a "good lift" and False "no-lift". Directions are as seen from the judges.
+        True represents a "good lift", False "no-lift" and None a non existing judgement. Directions are
+        from the lifter's POV.
 
         :param left: Judgement from the left judge
-        :param center: Judgement from the center judge
+        :param middle: Judgement from the middle judge
         :param right: Judgement from the right judge
         :return: None
         """
 
-        self._judging = (left, center, right)
+        left = left if left else "NA"
+        middle = middle if middle else "NA"
+        right = right if right else "NA"
+
+        self._judging = (left, middle, right)
         self._judgingSet.emit(list(self._judging))
 
     def clear_judging(self):
