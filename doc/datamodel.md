@@ -9,6 +9,7 @@ are indexes.
 | **ID** | Int      | Competition ID   |
 | Name   | NVARCHAR | Competition name |
 | Date   | Date     | Competition Date |
+| IsActive | bool | True if the competition is active, else false |
 
 ## Group
 | Field  | Type     | Notes          |
@@ -27,8 +28,7 @@ are indexes.
 | Field      | Type     | Notes                                         |
 | ---------- | -------- | --------------------------------------------- |
 | **ID**     | Int      | Competitor ID                                 |
-| CategoryID | Int      | Category ID                                   |
-| GroupID    | Int      | Group ID                                      |
+| CompetitionID | Int   | Competition ID                                |
 | FirstNames | NVARCHAR | Competitor First Names (comma,separated,list) |
 | LastName   | NVARCHAR | Competitor Last Name                          |
 | BodyWeight | Int      | Competitor weight in grams                    |

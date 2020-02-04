@@ -98,15 +98,16 @@ def run(args: argparse.Namespace):
     """
     client = sql.Client("sqlite:///:memory:")
     client.competitions().append(Name="Kevät ranking 2020",
-                                 CompetitionDate=datetime.date(2020, 3, 3))
+                                 CompetitionDate=datetime.date(2020, 3, 3),
+                                 IsActive=False)
     client.competitions().append(Name="Syys ranking 2020",
-                                 CompetitionDate=datetime.date(2020, 9, 3))
+                                 CompetitionDate=datetime.date(2020, 9, 3),
+                                 IsActive=False)
     bottle.get(r"/css/<filename>")(serve_css)
     bottle.get("/")(serve_index)
     bottle.get("/favicon.ico")(serve_favicon)
     bottle.get(r"/tables/<tablename>")(lambda tablename: serve_tables(tablename, client))
     bottle.get(r"/script/<filename>")(serve_script)
- #   bottle.get(r"/websocket")(serve_websocket)
     bottle.get(r"/websocket")(lambda: wshandler.serve_websocket(client))
 
     gevent.monkey.patch_all()  # Magic

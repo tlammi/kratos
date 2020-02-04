@@ -1,172 +1,5 @@
 
 /**
- * Helper class for managing HTML tables
- */
-class Table {
-    /**
-     * Constructs a new HTML table inside the HTML element with the given ID.
-     * @param {String} table_holder_id Container HTMl element where the table will be placed
-     */
-    constructor(table_holder_id){
-        this.table_elem = document.createElement("table");
-        document.getElementById(table_holder_id).appendChild(this.table_elem);
-        let table_head = this.table_elem.createTHead();
-        let header_row = document.createElement("tr");
-        table_head.appendChild(header_row);
-        this.table_elem.createTBody();
-
-    };
-
-    /**
-     * Set the header of the table instance. Overwrites the old header.
-     * 
-     * @param {Array} header_data Header elements from left to right
-     */
-    set_header(header_data){
-        let row = this.table_elem.tHead.children[0];
-        while(row.children.length > 0)
-            row.removeChild(row.children[0]);
-        
-        for(let h of header_data){
-            let elem = document.createElement("th");
-            elem.innerHTML = h;
-            row.appendChild(elem);
-        }
-    }
-
-    /**
-     * Inserts a row to table.
-     * 
-     * @param {int} index Index where to insert the row. With -1, will be placed last
-     * @param {Array} row_data Array of elements that will be inserted to the table
-     */
-    insert_row(index, row_data) {
-        let row = this.table_elem.tBodies[0].insertRow(index);
-        for(let d of row_data){
-            let elem = row.insertCell(-1);
-            elem.innerHTML = d;
-        }
-    }
-
-    /**
-     * Replaces the row with the lowest index
-     * having the value matching to the given value in the given column.
-     * 
-     * NOTE: Replaces the whole row!
-     * 
-     * @param {int} column Index of the column to compare
-     * @param {any} value Value to compare against column value
-     * @param {Array} new_row_data New data inserted to the table
-     */
-    replace_row_by_value_in_column(column, value, new_row_data) {
-        let rows = this.table_elem.tBodies[0].rows;
-        for(let i = 0; i < rows.length; i++){
-            if(rows[i].cells[column].innerHTML == value){
-                this.table_elem.tBodies[0].deleteRow(i);
-                this.insert_row(i, new_row_data);
-                return;
-            }
-        }
-    }
-    
-    /**
-     * Sets HTML element attributes columnwise
-     * 
-     * @param {int} column_index Index of the column to access
-     * @param {Attr} attr Attribute to add to the cells
-     */
-    set_column_attributes(column_index, attr){
-        for(let row of this.table_elem.tBodies[0].rows){
-            let tmp = attr.cloneNode();
-            row.cells[column_index].setAttributeNode(attr);
-        }
-    }
-
-    /**
-     * Sets HTML attribute of a cell in the table
-     * 
-     * @param {int} row_index Row of the cell to access
-     * @param {int} column_index Column of the cell to access
-     * @param {Attr} attr Attribute to add to the cell
-     */
-    set_cell_attribute(row_index, column_index, attr){
-        this.table_elem.tBodies[0].rows[row_index]
-            .cells[column_index].setAttributeNode(attr);
-    }
-    
-    /**
-     * Deletes the first row in table that has a matching value stored in the specified column
-     * 
-     * @param {int} column Column index to compare
-     * @param {any} value Value to compare against
-     */
-    delete_row_by_value_in_column(column, value){
-        let rows = this.table_elem.tBodies[0].rows;
-        for(let i = 0; i < rows.length; i++){
-            if(rows[i].cells[column].innerHTML == value){
-                this.table_elem.tBodies[0].deleteRow(i);
-                return;
-            }
-        }
-        alert("Failed to delete row in page. Please refresh the page.");
-    }
-
-    /**
-     * Returns the firsth row with matching value stored in the specified column
-     * 
-     * @param {int} column Column index to compare
-     * @param {any} value Value to compare against
-     * 
-     * @returns {Array} Of data stored in the row, or null in case of no match
-     */
-    get_row_by_value_in_column(column, value){
-        for(let row of this.table_elem.tBodies[0].rows){
-            if(row.cells[column].innerHTML == value){
-                let res = [];
-                for(let cell of row.cells){
-                    res.push(cell.innerHTML);
-                }
-                return res;
-            }
-        }
-        return null;
-    }
-};
-/**
- * Class for constructing buttons
- */
-class Button{
-
-    /**
-     * Ctor
-     * 
-     * @param {String} container_id ID of the element containing the button, or null if no need
-     * @param {String} onclick_handler String inserted to the HTML element for callbacks
-     * @param {String} text Text to place onto the button
-     */
-    constructor(container_id, onclick_handler, text){
-        this.button = document.createElement("button");
-        if(text != null) this.button.innerHTML = text;
-        if(container_id != null) document.getElementById(container_id).appendChild(this.button);
-        if(onclick_handler != null){
-            let tmp = document.createAttribute("onclick");
-            tmp.value = onclick_handler;
-            this.button.setAttributeNode(tmp);
-        }
-    }
-
-    /**
-     * Return outer HTML
-     * 
-     * @returns {String} With outer html representation
-     */
-    outer_html(){
-        return this.button.outerHTML;
-    }
-
-};
-
-/**
  * Class for handling competition table
  */
 class CompetitionTable {
@@ -174,17 +7,24 @@ class CompetitionTable {
     /**
      * Ctor
      * 
-     * @param {String} myname Name of the object, injected to html for callbacks (Should be exactly the same as the variable)
      * @param {String} container_id ID of the HTML element containing the table
-     * @param {WebSocket} wsock WebSocket used for notifying server on events
+     * @param {KratosWebApi} api WebSocket used for notifying server on events
      */
-    constructor(myname, container_id, wsock){
-        this.myname = myname;
-        this.wsock = wsock;
-        this.button_new = new Button(container_id, this.myname + ".new_competition_handler()", "New Competition");
+    constructor(container_id, api){
+        this._api = api;
 
-        this.tbl = new Table(container_id);
-        this.tbl.set_header(["ID", "Name", "Date", "Manage"]);
+        this.button_new = new Button(
+            document.getElementById(container_id),
+            () => {this.new_competition_handler();},
+            "New Competition");
+
+        this._tbl = new Table(document.getElementById(container_id), 0,
+                              ["ID", "Name", "CompetitionDate", "IsActive", "Manage"],
+                              ["ID", "Name", "Date", "Active", "Manage"]);
+
+        this._tbl.on_cell_modified  = (x, y, val) => {
+            console.log("Enter pressed on: " + "("+ x + ", " + y +"): " + val)
+        }
     }
 
     /**
@@ -194,18 +34,32 @@ class CompetitionTable {
      */
     add_competition(new_row){
 
-        let row = []
-        if(Array.isArray(new_row)){
-            row = new_row;
-        } else {
-            row = [new_row["ID"], new_row["Name"], new_row["CompetitionDate"]];
-        }
-        let id = row[0];
-        let activate_button = new Button(null, this.myname + ".activate_handler("+id+")", "Activate");
-        let modify_button = new Button(null, this.myname + ".modify_handler("+id+")", "Modify");
-        let delete_button = new Button(null, this.myname + ".delete_handler("+id+")", "Delete");
+        let id = new_row[0];
+        if(id === undefined)
+            id = new_row["ID"];
 
-        this.tbl.insert_row(-1, row.concat([activate_button.outer_html() + modify_button.outer_html() + delete_button.outer_html()]));
+        let div = document.createElement("div");
+
+        let activate_button = new Button(div, () => {
+            this.activate_handler(id);
+        }, "Activate");
+        let modify_button = new Button(div, () => {
+            this.modify_handler(id);
+        }, "Modify");
+        let delete_button = new Button(div, () =>{
+            this.delete_handler(id);
+        }, "Delete");
+
+        div.appendChild(activate_button.dom());
+        div.appendChild(modify_button.dom());
+        div.appendChild(delete_button.dom());
+
+        if(Array.isArray(new_row)){
+            new_row.push(div);
+        } else {
+            new_row["Manage"] = div;
+        }
+        this._tbl.append(new_row);
     }
 
     /**
@@ -215,7 +69,7 @@ class CompetitionTable {
      */
     remove_competition(id){
         console.log("Deleting competition with ID: " + id);
-        this.tbl.delete_row_by_value_in_column(0, id);
+        this._tbl.delete_row(id);
     }
 
     /**
@@ -225,13 +79,13 @@ class CompetitionTable {
      * @param {Array} values Array of values to replace the row with outside of Management column
      */
     replace_competition(id, values){
-        let activate_button = new Button(null, this.myname + ".activate_handler("+id+")", "Activate");
-        let modify_button = new Button(null, this.myname + ".modify_handler("+id+")", "Modify");
-        let delete_button = new Button(null, this.myname + ".delete_handler("+id+")", "Delete");
-        this.tbl.replace_row_by_value_in_column(0, id, 
-                                                values.concat([activate_button.outer_html() +  
-                                                               modify_button.outer_html() +
-                                                               delete_button.outer_html()]));
+        let row = this._tbl.row_as_dict(id);
+
+        if(values instanceof Array)
+            values.push(row["Manage"]);
+        else
+            values["Manage"] = row["Manage"];
+        this._tbl.replace_row(id, values);
     }
 
     /**
@@ -253,21 +107,56 @@ class CompetitionTable {
                           year + "-" + month + "-" + day);
         if(date == null) return;
         
-        let obj = {"event": "newRow", "target": "competitions", "values": {"Name": name}};
+        let obj = {"event": "newRow", "target": "Competitions", "values": {"Name": name}};
         if(date != "")
-        obj["values"]["CompetitionDate"] = date;
-        wsock.send(JSON.stringify(obj));
+            obj["values"]["CompetitionDate"] = date;
+        this._api.send_table_event(obj);
     }
 
     /**
      * Callback invoked by HTML button. Sets the corresponding competition as the active competition
      * 
-     * TODO: implement
-     * 
      * @param {any} id ID of the competition for which the event was invoked
      */
     activate_handler(id){
-        alert("Competition activation has not been implemented yet");
+        let row = this._tbl.row_as_array(id);
+
+        // The row was active already
+        if(row[3] == true) {
+            let obj =  {
+                "event": "rowModified",
+                "target": "Competitions",
+                "id": id,
+                "values": {
+                    "IsActive": false
+                }
+            }
+            let activate_button = row[4].childNodes[0].firstChild;
+            activate_button.innerHTML = "Activate";
+            this._api.send_table_event(obj);
+        }
+        else {
+            let col = this._tbl.get_column("IsActive");
+            for(let elem of col){
+                if(elem == true){
+                    alert("Cannot activate a connection while another one is active");
+                    return;
+                }
+            }
+
+            let obj = {
+                "event": "rowModified",
+                "target": "Competitions",
+                "id": id,
+                "values": {
+                    "IsActive": true
+                }
+            };
+
+            let activate_button = row[4].childNodes[0].firstChild;
+            activate_button.innerHTML = "Deactivate";
+            this._api.send_table_event(obj);
+        }
     }
 
     /**
@@ -276,7 +165,7 @@ class CompetitionTable {
      *  @param {any} id ID of the competition to modify.
      */
     modify_handler(id){
-        let row = this.tbl.get_row_by_value_in_column(0, id);
+        let row = this._tbl.row_as_array(id);
         let name = row[1];
         let date = row[2];
         name = prompt("Give new name", name);
@@ -285,14 +174,14 @@ class CompetitionTable {
         if(date == null) return;
         let obj = {
             "event": "rowModified",
-            "target": "competitions", 
+            "target": "Competitions",
             "id": id, 
             "values": {
                 "Name": name, 
                 "CompetitionDate": date
             }
         };
-        wsock.send(JSON.stringify(obj));
+        this._api.send_table_event(obj);
     }
 
     /**
@@ -301,47 +190,118 @@ class CompetitionTable {
      * @param {any} id ID of the competition to delete 
      */
     delete_handler(id){
-        let row = this.tbl.get_row_by_value_in_column(0, id);
-        if(confirm("Are you sure? This will permanently delete the competition with name " + row[1])){
-            let obj = {"event": "rmRow", "target": "competitions", "id": id};
-            wsock.send(JSON.stringify(obj));
+        let row = this.tbl.row_as_array(id);
+        if(confirm("Are you sure? \
+            This will permanently delete \
+            the competition with name " + row[1])){
+
+            let obj = {"event": "rmRow", "target": "Competitions", "id": id};
+            this._api.send_table_event(obj);
         }
     }
 
 };
 
+class CompetitorTable {
+    constructor(container_id, api){
+        this._api = api;
 
-let wsock = new WebSocket("ws://"+ location.host +"/websocket");
-let competitions_tbl = new CompetitionTable("competitions_tbl", "competition_list_table", wsock);
+        this.new_button = new Button(
+            document.getElementById(container_id),
+            () => {
+                this.new_competitor_handler();
+            },
+            "New Competitor"
+        );
 
+        this._tbl = new Table(document.getElementById(container_id),0,
+                        ["ID", "LastName", "FirstNames", "BodyWeight", "Sex"],
+                        ["ID", "Last Name", "First Names", "Body Weight", "Sex"])
+        
 
-wsock.onopen = function(event){
-    let obj = {event: "getTable", target: "competitions"};
-    wsock.send(JSON.stringify(obj));
+        this._tbl.on_cell_modified = (x, y, data) => {
+            let obj = {
+                "event": "rowModified",
+                "target": "Competitors"
+            };
+            obj["id"] = y;
+            obj["values"] = {};
+            obj["values"][x] = data;
+            this._api.send_table_event(obj);
+            console.log("Modified (" + x + ", " + y + "): " + data);
+        }
+        this._tbl.set_rw_mask([false, true, true, true, true]);
+        this._tbl.set_visible_mask([true, true, true, true, true]);
+    }
+
+    add_competitor(new_row) {
+        this._tbl.append(new_row);
+    }
+
+    new_competitor_handler() {
+        let obj = {
+            "event": "newRow",
+            "target": "Competitors",
+            "values": {
+            }
+        };
+        this._api.send_table_event(obj);
+    }
+
+    replace_competitor(id, values) {
+        this._tbl.replace_row(id, values);
+    }
+
+    clear(){
+        this._tbl.clear();
+    }
 };
 
-wsock.onmessage = function(event){
-    let obj = JSON.parse(event.data);
-    if(obj.event == "getTable"){
-        if(obj.target == "competitions"){
-            for(let val of obj.rows)
-            competitions_tbl.add_competition(val);
-        }
+let kratos_api = new KratosWebApi("ws://"+location.host + "/websocket");
+let competitions_tbl = new CompetitionTable("competition_list_table", kratos_api);
+let competitor_tbl = new CompetitorTable("competitor_table", kratos_api);
 
-    } else if (obj.event == "newRow"){
-        if(obj.target == "competitions"){
-            competitions_tbl.add_competition(obj.values);
-        }
-    } else if (obj.event == "rmRow"){
-        if(obj.target == "competitions"){
-            competitions_tbl.remove_competition(obj.id);
-        }
-    } else if(obj.event == "rowModified"){
-        if(obj.target == "competitions"){
-            competitions_tbl.replace_competition(obj.id, [obj.id].concat([obj.values.Name, obj.values.CompetitionDate]))
-        }
+
+kratos_api.table_event_handler("Competitions", "getTable", (obj)=>{
+    for(let val of obj.rows){
+        competitions_tbl.add_competition(val);
     }
-}
+});
+kratos_api.table_event_handler("Competitions", "newRow", (obj) => {
+    competitions_tbl.add_competition(obj.values);
+});
+
+kratos_api.table_event_handler("Competitions", "rmRow", (obj) => {
+    competitions_tbl.remove_competition(obj.id);
+});
+
+kratos_api.table_event_handler("Competitions", "rowModified", (obj) => {
+    let tmp = obj.values;
+    tmp["ID"] = obj.id;
+    competitions_tbl.replace_competition(
+        obj.id,
+        tmp
+    );
+});
+
+kratos_api.table_event_handler("CurrentCompetitors", "getTable", (obj) => {
+    competitor_tbl.clear();
+    for(let row of obj.rows){
+        competitor_tbl.add_competitor(row);
+    }
+});
+
+kratos_api.table_event_handler("CurrentCompetitors", "newRow", (obj) => {
+    competitor_tbl.add_competitor(obj.values);
+});
+
+kratos_api.table_event_handler("Competitors", "rowModified", (obj) => {
+    competitor_tbl.replace_competitor(obj.id, obj.values);
+});
+
+kratos_api.start();
+
+competitions_tbl.wsock = kratos_api.debug_websocket();
 
 // Handles tab button press by opening a corresponding tab
 function opentab(event, tabname) {
@@ -360,7 +320,6 @@ function opentab(event, tabname) {
         for(var i=0; i < tabbuttons.length; i++){
             tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
         }
-
     }
 
     function show_tab(tabname){
@@ -376,29 +335,3 @@ function opentab(event, tabname) {
     show_tab(tabname);
     activate_button(event.currentTarget);
 }
-
-/*
-$("#MyTable tbody tr").click(function () {
-    $(this).addClass("selected").siblings().removeClass("selected")
-});
-$("#MyTable tr td").keypress(function (event) {
-    if (event.which === 13) {
-        var x = this.cellIndex;
-        var y = this.parentNode.rowIndex;
-        var text = $(this).text()
-        $.post("/postcell", {
-            "x": x,
-            "y": y,
-            "text": text
-        })
-        console.log("Enter pressed: (" + x + ", " + y + ")" + " " + text);
-        return false;
-    }
-});
-
-function add_lifter() {
-    console.log("Add lifter pressed");
-    $.post("/postnewline")
-};
-
-*/
