@@ -46,12 +46,14 @@ topics and a server (broker) forwards these messages to the correct clients.
 | Clock is started | Unit is running and no configuration is done | The unit starts to count down from 1 minute |
 | Clock is started | Clock is already running | No-op |
 | Clock is started | Clock hasn't expired (i.e. there's still time remaining) | Countdown is continued from previous value |
+| Clock is started | Clock has expired | Countdown is started from previously set start value |
 | Clock is stopped | Clock is running | Countdown is stopped and the current value is stored |
 | Clock is stopped | Clock is not running | No-op |
 | Time is set | Unit is running, clock is stopped | Value is stored as the new countdown start value, if previous value is stored it will be overwriten |
 | Time is set | Clock is running | No-op |
+| Time is set with invalid value | Unit is running | No-op |
 | Clock refresh is requested | Unit is running, clock is stopped | Current countdown start value is published to the `clock/time/current` topic |
-| Clock refresh is requested | Clock is running | Current countdown start value is publised to the `clock/time/current` topic |
+| Clock refresh is requested | Clock is running | Current countdown is publised to the `clock/time/current` topic |
 | Clock expires | Countdown reached 0 | Null message is published to the `clock/expired` topic and the unit signals that time has ran out |
 
 
