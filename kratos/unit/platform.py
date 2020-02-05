@@ -34,7 +34,7 @@ def parse_float_or(string: str, default: float=None) -> float:
     try:
         res = float(string)
     except:
-        res = default if default else 0.0
+        res = default or 0.0
     finally:
         return res
 
@@ -171,7 +171,7 @@ def add_cli_args(parser: argparse.ArgumentParser) -> None:
     """
 
     parser.add_argument("--virtual",
-                        help="Specifiying virtual, launches the GUI in a window",
+                        help="Specifiying virtual launches the GUI in a window",
                         action="store_true")
 
 def run(args: argparse.Namespace) -> None:
@@ -183,7 +183,7 @@ def run(args: argparse.Namespace) -> None:
     :param args: arguments passed via cli
     """
 
-    if args.virtual == True:
+    if args.virtual:
         screen = gui.VirtualPlatformScreen()
     else:
         screen = gui.PlatformScreen()

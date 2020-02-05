@@ -237,7 +237,7 @@ class PlatformData(QtCore.QObject):
 
     @minutes.setter
     def minutes(self, minutes: int):
-        if minutes == None:
+        if minutes is None:
             self._minutes = "-"
         else:
             self._minutes = str(minutes)
@@ -261,7 +261,7 @@ class PlatformData(QtCore.QObject):
 
     @seconds.setter
     def seconds(self, seconds: int):
-        if seconds == None:
+        if seconds is None:
             self._seconds = "-"
         else:
             self._seconds = str(seconds) if seconds >= 10 else f"0{str(seconds)}"
@@ -297,9 +297,9 @@ class PlatformData(QtCore.QObject):
         :return: None
         """
 
-        left = left if left else "NA"
-        middle = middle if middle else "NA"
-        right = right if right else "NA"
+        left = left or "NA"
+        middle = middle or "NA"
+        right = right or "NA"
 
         self._judging = (left, middle, right)
         self._judgingSet.emit(list(self._judging))

@@ -41,7 +41,7 @@ topics and a server (broker) forwards these messages to the correct clients.
 | --- | --- | --- |
 | Current lifter's info is updated | Unit is running | The update is relayed to the screen |
 | Current lifter's info contains invalid value(s) | Unit is running | No-op |
-| Two votes are published | Unit is running | The judging is displayed in the screen |
+| Two same votes are published | Unit is running | The judging is displayed in the screen |
 | Final vote is published | Unit is running and two previous votes are published | The judging is updated |
 | Clock is started | Unit is running and no configuration is done | The unit starts to count down from 1 minute |
 | Clock is started | Clock is already running | No-op |
