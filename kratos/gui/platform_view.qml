@@ -275,11 +275,11 @@ Page {
 
                             onJudgingSet: {
                                 leftJudgeDecision.color =
-                                    judging[0] === "NA" ? "black" : judging[0] ? "white" : "red"
+                                    judging[0] === "NA" ? "black" : judging[0]
                                 middleJudgeDecision.color =
-                                    judging[1] === "NA" ? "black" : judging[1] ? "white" : "red"
+                                    judging[1] === "NA" ? "black" : judging[1]
                                 rightJudgeDecision.color =
-                                    judging[2] === "NA" ? "black" : judging[2] ? "white" : "red"
+                                    judging[2] === "NA" ? "black" : judging[2]
 
                                 bottom_stack.currentIndex = 1
                             }
