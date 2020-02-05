@@ -12,7 +12,7 @@ class JoinedTableView:
     Class used for accessing SQL tables that do not exsist in the database
     but are produced by joining other tables.
     """
-    
+
     def __init__(self, query: TextClause, conn, index_col: str):
         """
         Init
@@ -25,7 +25,6 @@ class JoinedTableView:
         self._conn = conn
         self._index_col = index_col
 
-    
     def to_list(self):
         """
         Returns contents of the table as a list of dicts
@@ -47,5 +46,15 @@ class JoinedTableView:
         """
         []-operator
         """
-        query = sqlalchemy.text(f"{self._query.text} WHERE {self._index_col} = {item}")
-        return util.sql_result_to_dicts(self._conn.execute(query))[0]
+        where_clause = f"{self._index_col} = {item}"
+        return self.where(where_clause)[0]
+
+    def where(self, where_clause: str):
+        """
+        Append a where clause to the query and return the result
+
+        :param where_clause: WHERE clause
+        :return: List of dicts containing the results
+        """
+        query = sqlalchemy.text(f"{self._query.text} WHERE {where_clause}")
+        return util.sql_result_to_dicts(self._conn.execute(query))
