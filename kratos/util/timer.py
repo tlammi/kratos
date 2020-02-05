@@ -9,11 +9,18 @@ import typing
 
 
 class Timer:
+    """
+    Oneshot countdown timer with optional callback on start of every
+    second and at experation
+    """
     def __init__(self):
         self._running = threading.Event()
         self._remaining_time = 0
 
         self._worker_thread = None
+        self._timeout = None
+        self._once_per_second_cb = None
+        self._expired_cb = None
 
     def clear(self):
         """
@@ -24,9 +31,9 @@ class Timer:
             raise RuntimeError("Timer is running")
         self._remaining_time = 0
 
-    def start(self, timeout: int=None,
-              once_per_second: typing.Callable[[int], None]=None,
-              expired: typing.Callable[[], None]=None) -> None:
+    def start(self, timeout: int = None,
+              once_per_second: typing.Callable[[int], None] = None,
+              expired: typing.Callable[[], None] = None) -> None:
         """
         Start the timer.
 
@@ -44,7 +51,7 @@ class Timer:
         if self._running.is_set():
             raise RuntimeError("Timer is already running")
 
-        if timeout == None and self._remaining_time == 0:
+        if timeout is None and self._remaining_time == 0:
             raise ValueError("No timeout value stored, please provide one")
 
         timeout = int(timeout) if timeout else self._remaining_time
@@ -57,7 +64,7 @@ class Timer:
         self._worker_thread = threading.Thread(target=self._worker)
         self._worker_thread.start()
         self._running.set()
-    
+
     def stop(self) -> int:
         """
         Stop the running timer. If there is around 100 ms left in the
@@ -76,7 +83,7 @@ class Timer:
             self._worker_thread.join()
 
         return self._remaining_time
-    
+
     @property
     def remaining_time(self):
         """
@@ -84,7 +91,7 @@ class Timer:
         """
 
         return self._remaining_time
-    
+
     @property
     def running(self):
         """
@@ -92,7 +99,7 @@ class Timer:
         """
 
         return self._running.is_set()
-    
+
     def _worker(self) -> int:
         cb_executor = futures.ThreadPoolExecutor()
 
@@ -109,19 +116,20 @@ class Timer:
         for remaining_ticks in range(timeout, 0, -1):
             if not self._running.is_set():
                 break
-            else:
-                target += one_tick
-                time.sleep((target - now()).total_seconds())
 
-                if remaining_ticks % ticks_per_second == 0:
-                    self._remaining_time = remaining_ticks // ticks_per_second
-                    if self._once_per_second_cb:
-                        cb_executor.submit(self._once_per_second_cb,
-                                           self._remaining_time)
+            target += one_tick
+            time.sleep((target - now()).total_seconds())
+
+            if remaining_ticks % ticks_per_second == 0:
+                self._remaining_time = remaining_ticks // ticks_per_second
+                if self._once_per_second_cb:
+                    cb_executor.submit(self._once_per_second_cb,
+                                       self._remaining_time)
 
         remaining_ticks -= 1
         self._remaining_time = remaining_ticks // ticks_per_second
 
         if remaining_ticks == 0:
+            self._running.clear()
             if self._expired_cb:
                 cb_executor.submit(self._expired_cb)
