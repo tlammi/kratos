@@ -7,7 +7,8 @@ branches:
 
 jobs:
   include:
-    - services:
+    - name: "Integration Tests"
+      services:
       - xvfb
       addons:
         chrome: stable
@@ -22,9 +23,11 @@ jobs:
       - python3 -m pip install -r requirements.txt
       - python3 -m pip install -r integration_test/requirements.txt
       script: python3 ./integration_test/run_tests.py
-    - before_script:
+    - name: "Unit Tests"
+      before_script:
       - python3 -m pip install -r requirements.txt
       script: python3 ./script/run_pytest.py
-    - before_script:
+    - name: "Pylint"
+      before_script:
       - python3 -m pip install -r requirements.txt
       script: python3 ./script/run_pylint.py ./kratos
