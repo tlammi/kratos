@@ -1,0 +1,2 @@
+robotframework >= 3.1.2
+robotframework-seleniumlibrary >= 4.2.0

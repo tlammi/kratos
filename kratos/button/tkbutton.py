@@ -32,14 +32,7 @@ class TkButtonMeta(abc.ABCMeta):
 
         All parameters are Python magic
         """
-        cls._tk = tkinter.Tk()
-        cls._left = tkinter.Frame(cls._tk)
-        # Order is from the competitor's perspetive
-        cls._left.pack(side="left")
-        cls._middle = tkinter.Frame(cls._tk)
-        cls._middle.pack(side="left")
-        cls._right = tkinter.Frame(cls._tk)
-        cls._right.pack(side="left")
+        cls._is_init = False
         return super().__new__(cls, *args, **kwargs)
 
     def _register_button(cls, place: TkButtonPlace, text: str,
@@ -53,6 +46,7 @@ class TkButtonMeta(abc.ABCMeta):
         :param bground: Background color as string
         :param fground: Foreground color as string
         """
+        cls._ensure_init()
         placements = {
             TkButtonPlace.LEFT_U: (cls._left, "top"),
             TkButtonPlace.LEFT_D: (cls._left, "bottom"),
@@ -68,6 +62,22 @@ class TkButtonMeta(abc.ABCMeta):
         b["text"] = text
         b["command"] = lambda: callback(userdata)
 
+    def _ensure_init(cls):
+        """
+        Initializes the class
+
+        Needs to be called separately so import does not fail on non-gui systems.
+        """
+        if not cls._is_init:
+            cls._tk = tkinter.Tk()
+            cls._left = tkinter.Frame(cls._tk)
+            # Order is from the competitor's perspetive
+            cls._left.pack(side="left")
+            cls._middle = tkinter.Frame(cls._tk)
+            cls._middle.pack(side="left")
+            cls._right = tkinter.Frame(cls._tk)
+            cls._right.pack(side="left")
+            cls._is_init = True
 
 class TkButton(button.Button, metaclass=TkButtonMeta):
     """

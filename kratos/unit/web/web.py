@@ -1,14 +1,18 @@
+"""
+Main file and entrypoint for web unit
+"""
 import argparse
-import bottle
 import os
 import datetime
 import logging
+import bottle
 import sql
 import util
-import time
 import gevent.monkey
 import gevent.pywsgi
 import geventwebsocket
+
+from . import wshandler
 
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
@@ -17,7 +21,9 @@ HTML_FILE = os.path.join(HTML_DIR, "index.html")
 
 
 LIFTER_TABLE_HEADERS = ["Last Name", "First Names", "Body Weight",
-                        "Snatch 1", "Snatch 2", "Snatch 3", "C&J 1", "C&J 2", "C&J 3", "Tot", "Sinclair"]
+                        "Snatch 1", "Snatch 2", "Snatch 3",
+                        "C&J 1", "C&J 2", "C&J 3",
+                        "Tot", "Sinclair"]
 
 LOGGER = logging.getLogger(__file__)
 
@@ -45,7 +51,7 @@ def serve_css(filename):
     :param filename: File in css/
     :return: String read from the file
     """
-    LOGGER.debug(f"serving {filename}")
+    LOGGER.debug("serving %s", filename)
     return bottle.static_file(filename, root=os.path.join(THISDIR, "css"))
 
 def serve_script(filename):
@@ -68,31 +74,11 @@ def serve_tables(tablename: str, client: sql.Client):
         Initialized before the function execution.
     :return: Table as HTML string
     """
-    LOGGER.debug(f"serving {tablename}")
+    LOGGER.debug("serving %s", tablename)
     if tablename == "competitions":
         return util.to_html_table(*client.competitions().to_header_and_rows())
 
     return f"<h2>This will contain table &lt;{tablename}&gt;</h2>"
-
-def serve_websocket():
-    """
-    Serves websocket connection.
-
-    The connection is disconnected once the function returns.
-
-    :return: None
-    """
-    wsock = bottle.request.environ.get("wsgi.websocket")
-    if not wsock:
-        bottle.abort(400, "Expected WebSocket request.")
-    while True:
-        try:
-            time.sleep(5)
-            wsock.send("This is a WebSocketEvent.<br>")
-        except geventwebsocket.WebSocketError:
-            break
-
-
 
 def add_cli_args(_parser: argparse.ArgumentParser):
     """
@@ -112,15 +98,17 @@ def run(args: argparse.Namespace):
     """
     client = sql.Client("sqlite:///:memory:")
     client.competitions().append(Name="Kevät ranking 2020",
-                                 CompetitionDate=datetime.date(2020, 3, 3))
+                                 CompetitionDate=datetime.date(2020, 3, 3),
+                                 IsActive=False)
     client.competitions().append(Name="Syys ranking 2020",
-                                 CompetitionDate=datetime.date(2020, 9, 3))
+                                 CompetitionDate=datetime.date(2020, 9, 3),
+                                 IsActive=False)
     bottle.get(r"/css/<filename>")(serve_css)
     bottle.get("/")(serve_index)
     bottle.get("/favicon.ico")(serve_favicon)
     bottle.get(r"/tables/<tablename>")(lambda tablename: serve_tables(tablename, client))
     bottle.get(r"/script/<filename>")(serve_script)
-    bottle.get(r"/websocket")(serve_websocket)
+    bottle.get(r"/websocket")(lambda: wshandler.serve_websocket(client))
 
     gevent.monkey.patch_all()  # Magic
     bottle.run(server="gevent", host="localhost", port=8080,

@@ -3,8 +3,10 @@ SQL client
 """
 
 import sqlalchemy
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, NVARCHAR, Date, CHAR
+from sqlalchemy import create_engine, MetaData, Table, Column, \
+    Integer, NVARCHAR, Date, CHAR, Boolean
 
+from . import joinedtableview
 from . import tableview
 from . import util
 
@@ -13,6 +15,25 @@ class Client:
     """
     Wrapper for SQL interface
     """
+
+
+    CURRENT_COMPETITION_QUERY = sqlalchemy.text("""
+    WITH
+        CurrentCompetitions AS (SELECT * FROM Competitions WHERE IsActive = 1),
+        CurrentCompetitors AS (
+            SELECT
+                Competitors.ID AS ID,
+                Competitors.LastName AS LastName,
+                Competitors.FirstNames AS FirstNames,
+                Competitors.BodyWeight AS BodyWeight,
+                Competitors.Sex AS Sex
+            FROM
+                Competitors JOIN CurrentCompetitions ON CurrentCompetitions.ID = Competitors.CompetitionID)
+    SELECT
+        *
+    FROM
+        CurrentCompetitors
+    """)
 
     def __init__(self, url: str, debug=False):
         """
@@ -27,17 +48,27 @@ class Client:
         self._competitions = Table("Competitions", self._meta,
                                    Column("ID", Integer, primary_key=True),
                                    Column("Name", NVARCHAR),
-                                   Column("CompetitionDate", Date))
+                                   Column("CompetitionDate", Date),
+                                   Column("IsActive", Boolean, default=False))
 
         self._competitors = Table("Competitors", self._meta,
                                   Column("ID", Integer, primary_key=True),
                                   Column("CompetitionID", Integer),
                                   Column("CategoryID", Integer),
                                   Column("GroupID", Integer),
-                                  Column("FirstNames", NVARCHAR),
                                   Column("LastName", NVARCHAR),
+                                  Column("FirstNames", NVARCHAR),
                                   Column("BodyWeight", Integer),
                                   Column("Sex", CHAR))
+
+        self._groups = Table("Groups", self._meta,
+                             Column("ID", Integer, primary_key=True),
+                             Column("CID", Integer),
+                             Column("Name", NVARCHAR))
+
+        self._categories = Table("Categories", self._meta,
+                                 Column("ID", Integer),
+                                 Column("Name", NVARCHAR))
 
         self._attempts = Table("Attempts", self._meta,
                                Column("ID", Integer, primary_key=True),
@@ -67,6 +98,30 @@ class Client:
         """
         return tableview.TableView(self._competitors, self._conn, "ID")
 
+    def current_competitors(self):
+        """
+        View of current competitors
+
+        The table handled via the View-object is produced as a join of
+        competitors and competitions.
+        """
+        return joinedtableview.JoinedTableView(self.CURRENT_COMPETITION_QUERY, self._conn, "ID")
+
+    def get_current_competitors(self):
+        """
+        Competitor list in the current competition
+        """
+        query = sqlalchemy.text(
+            """
+            WITH CurrentCompetitions AS (SELECT * FROM Competitions WHERE IsActive = 1)
+            SELECT *
+            FROM CurrentCompetitions JOIN Competitors
+                ON CurrentCompetitions.ID = Competitors.CompetitionID
+            """
+        )
+
+        return util.sql_result_to_header_and_rows(self._conn.execute(query))
+
     def attempts(self):
         """
         View of the attempts
@@ -94,7 +149,7 @@ class Client:
                 cj2 AS (SELECT * FROM cjs WHERE Number = 2),
                 cj3 AS (SELECT * FROM cjs WHERE Number = 3),
                 flat_attempts AS (
-                    SELECT 
+                    SELECT
                         snatch1.CompetitorID as "CompetitorID",
                         snatch1.Status AS "Snatch1Status",
                         snatch1.Result AS "Snatch1Result",

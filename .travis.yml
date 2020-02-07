@@ -1,0 +1,30 @@
+language: python
+dist: bionic
+python: 3.8
+branches:
+  only:
+  - master
+
+jobs:
+  include:
+    - services:
+      - xvfb
+      addons:
+        chrome: stable
+      before_install:
+      - CDVERSION=`curl http://chromedriver.storage.googleapis.com/LATEST_RELEASE`
+      - echo $CDVERSION
+      - wget --no-verbose http://chromedriver.storage.googleapis.com/$CDVERSION/chromedriver_linux64.zip
+      - unzip chromedriver_linux64.zip
+      - sudo chmod u+x chromedriver
+      - sudo mv chromedriver /usr/bin/
+      before_script:
+      - python3 -m pip install -r requirements.txt
+      - python3 -m pip install -r integration_test/requirements.txt
+      script: python3 ./integration_test/run_tests.py
+    - before_script:
+      - python3 -m pip install -r requirements.txt
+      script: python3 ./script/run_pytest.py
+    - before_script:
+      - python3 -m pip install -r requirements.txt
+      script: python3 ./script/run_pylint.py ./kratos

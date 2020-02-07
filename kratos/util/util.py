@@ -1,6 +1,8 @@
 """
 Utility functions
 """
+import json
+import datetime
 
 
 def mqtt_match(topic_filter: str, topic: str):
@@ -43,7 +45,7 @@ def xml_wrap(tag: str, text: str, attrs: list = None):
     attrs = attrs or []
     attrstr = " ".join(attrs)
     if text:
-       return f"<{tag} {attrstr}>{text}</{tag}>"
+        return f"<{tag} {attrstr}>{text}</{tag}>"
     return f"<{tag} {attrstr}/>"
 
 
@@ -69,3 +71,23 @@ def to_html_table(header: list, values: list):
 
     return xml_wrap("table", headerstr+datastr)
 
+
+def serialize_dict(dict_in: dict):
+    """
+    Converts dict to JSON
+
+    Performs the same functionality as json.dumps
+    but additionally handles datetime module objects.
+    """
+
+    def recursive_serialize(d: dict):
+        for k, v in d.items():
+            if isinstance(v, (datetime.datetime, datetime.date, datetime.time)):
+                d[k] = str(v)
+            elif isinstance(v, dict):
+                recursive_serialize(v)
+
+    recursive_serialize(dict_in)
+
+    print(dict_in)
+    return json.dumps(dict_in)

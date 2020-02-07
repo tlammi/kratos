@@ -177,8 +177,8 @@ class MqttEngine:
                 "Send buffer is full, cannot publish.")
         raise ValueError("Unknown result code from paho-mqtt: %s" % res.rc)
 
-    def _connect_cb(self, client, userdata, flags, rc):
-        LOGGER.info("Connected with result code %s", rc)
+    def _connect_cb(self, client, userdata, flags, rcode):
+        LOGGER.info("Connected with result code %s", rcode)
         for topic in self._handlers[self._config.unit_name]:
             result, mid = client.subscribe(topic)
             if result == mqtt.MQTT_ERR_SUCCESS:
@@ -188,7 +188,7 @@ class MqttEngine:
             else:
                 raise ValueError("Unknown return value from paho-mqtt")
 
-    def _disconnect_cb(self, client, userdata, rc):
+    def _disconnect_cb(self, client, userdata, rcode):
         LOGGER.info("Disconnected")
 
     def _msg_cb(self, client, userdata, msg):
