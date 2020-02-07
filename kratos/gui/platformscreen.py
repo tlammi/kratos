@@ -77,7 +77,7 @@ class PlatformData(QtCore.QObject):
         self._weight = "-"
         self._minutes = "-"
         self._seconds = "-"
-        self._judging = None
+        self._judging = ("NA", "NA", "NA")
 
     _lot_numberChanged = QtCore.pyqtSignal(str,
                                            name="lot_numberChanged",
@@ -237,7 +237,11 @@ class PlatformData(QtCore.QObject):
 
     @minutes.setter
     def minutes(self, minutes: int):
-        self._minutes = str(minutes)
+        if minutes is None:
+            self._minutes = "-"
+        else:
+            self._minutes = str(minutes)
+
         self._minutesChanged.emit(self._minutes)
 
     _secondsChanged = QtCore.pyqtSignal(str,
@@ -257,7 +261,11 @@ class PlatformData(QtCore.QObject):
 
     @seconds.setter
     def seconds(self, seconds: int):
-        self._seconds = str(seconds) if seconds >= 10 else f"0{str(seconds)}"
+        if seconds is None:
+            self._seconds = "-"
+        else:
+            self._seconds = str(seconds) if seconds >= 10 else f"0{str(seconds)}"
+
         self._secondsChanged.emit(self._seconds)
 
     _judgingSet = QtCore.pyqtSignal(list,
@@ -267,28 +275,39 @@ class PlatformData(QtCore.QObject):
 
     def get_judging(self):
         """
-        Get the currently set judging result
+        Get the currently set judging result.
 
-        True represents a "good lift" and False "no-lift". Directions are as seen from the judges.
+        If the a judge has not voted the result will be "NA" otherwise "white" (good lift) or "red"
+        (not good lift).
 
-        :return: None or a tuple containing the results (left, center, right)
+        :return: Tuple containing the results (left, middle, right)
         """
 
         return self._judging
 
-    def set_judging(self, left: bool, center: bool, right: bool):
+    def set_judging(self, left: str, middle: str, right: str):
         """
-        Display judging results
+        Display judging results.
 
-        True represents a "good lift" and False "no-lift". Directions are as seen from the judges.
+        True represents a "good lift", False "no-lift" and None a non existing judgement. Directions are
+        from the lifter's POV.
 
-        :param left: Judgement from the left judge
-        :param center: Judgement from the center judge
-        :param right: Judgement from the right judge
+        :param left: Judgement from the left judge ("white", "red" or "NA")
+        :param middle: Judgement from the middle judge ("white", "red" or "NA")
+        :param right: Judgement from the right judge ("white", "red" or "NA")
         :return: None
         """
 
-        self._judging = (left, center, right)
+        if left not in ("white", "red", "NA"):
+            raise ValueError("Invalid value from left judge")
+
+        if middle not in ("white", "red", "NA"):
+            raise ValueError("Invalid value from middle judge")
+
+        if right not in ("white", "red", "NA"):
+            raise ValueError("Invalid value from right judge")
+
+        self._judging = (left, middle, right)
         self._judgingSet.emit(list(self._judging))
 
     def clear_judging(self):
@@ -298,5 +317,5 @@ class PlatformData(QtCore.QObject):
         :return: None
         """
 
-        self._judging = None
+        self._judging = ("NA", "NA", "NA")
         self._judgingCleared.emit()

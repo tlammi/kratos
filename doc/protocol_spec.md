@@ -36,7 +36,25 @@ topics and a server (broker) forwards these messages to the correct clients.
 
 
 #### Platform Screen Unit
-TBA
+
+| Given | When | Then |
+| --- | --- | --- |
+| Current lifter's info is updated | Unit is running | The update is relayed to the screen |
+| Current lifter's info contains invalid value(s) | Unit is running | No-op |
+| Two same votes are published | Unit is running | The judging is displayed in the screen |
+| Final vote is published | Unit is running and two previous votes are published | The judging is updated |
+| Clock is started | Unit is running and no configuration is done | The unit starts to count down from 1 minute |
+| Clock is started | Clock is already running | No-op |
+| Clock is started | Clock hasn't expired (i.e. there's still time remaining) | Countdown is continued from previous value |
+| Clock is started | Clock has expired | Countdown is started from previously set start value |
+| Clock is stopped | Clock is running | Countdown is stopped and the current value is stored |
+| Clock is stopped | Clock is not running | No-op |
+| Time is set | Unit is running, clock is stopped | Value is stored as the new countdown start value, if previous value is stored it will be overwriten |
+| Time is set | Clock is running | No-op |
+| Time is set with invalid value | Unit is running | No-op |
+| Clock refresh is requested | Unit is running, clock is stopped | Current countdown start value is published to the `clock/time/current` topic |
+| Clock refresh is requested | Clock is running | Current countdown is publised to the `clock/time/current` topic |
+| Clock expires | Countdown reached 0 | Null message is published to the `clock/expired` topic and the unit signals that time has ran out |
 
 
 ## Topic Hierarchy
@@ -55,8 +73,8 @@ then the log level and finally the unit from which the log originates from. Addi
 
 - `clock/start` - Used for starting a clock unit
 - `clock/stop` - Used for stopping a clock unit
-- `clock/time/set`- Used for setting the current time
-- `clock/time/current` - Used for getting the current time from the unit
+- `clock/time/set`- Used for setting the current time (countdown value should be expressed in seconds)
+- `clock/time/current` - Used for getting the current time from the unit (countdown value is published in seconds)
 - `clock/time/refresh` - Used to tell clock unit to publish the current time to `clock/time/current`
 - `clock/expired` - Used for publishing clock expiriration event
 - `lifter/current/name/first` - Used for storing the lifter's first name
