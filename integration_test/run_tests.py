@@ -23,6 +23,7 @@ ARGS = [
 
 KWARGS = {
     "outputdir": OUTPUTDIR,
+    "noncritical": ["FEATURE_UNDER_DEVELOPMENT"]
 }
 
 def setup_environment():
@@ -52,5 +53,6 @@ if __name__ == "__main__":
         KWARGS["include"] = args.include
     if args.exclude:
         KWARGS["exclude"] = args.exclude
+
 
     sys.exit(robot.run(*ARGS, **KWARGS))

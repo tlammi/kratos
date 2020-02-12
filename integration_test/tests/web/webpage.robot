@@ -8,7 +8,7 @@ Library  SeleniumLibrary
 Test Setup  Do Setup
 Test Teardown  Do Teardown
 
-Force Tags  Web page
+Force Tags  WEB_PAGE
 
 *** Test Cases ***
 Test Open

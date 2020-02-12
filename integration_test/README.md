@@ -16,7 +16,11 @@ Specify *--help* flag for the script for more information.
 
 ## Tags
 
-- Web Server -- Web server tests
-- Web page -- Web page tests
-- WebSocket -- WebSocket tests
+- WEB_SERVER -- Web server tests
+- WEB_PAGE -- Web page tests
+- WEBSOCKET -- WebSocket tests
 - SQL - SQL database tests
+
+### Tags used for non-critical tests
+
+- FEATURE_UNDER_DEVELOPMENT -- Feature has not been implemented yet
