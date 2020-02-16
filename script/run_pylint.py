@@ -7,6 +7,8 @@ import sys
 import re
 import subprocess
 
+MIN_SCORE = 9.5
+
 THISDIR = os.path.dirname(os.path.realpath(__file__))
 RCFILE = os.path.join(THISDIR, "pylintrc")
 PYLINT_ARGS = ["--rcfile=%s" % RCFILE,
@@ -37,11 +39,11 @@ def main():
     lines = [line for line in lines if line.strip() != ""]
     pylint_score = float(PYLINT_SCORE_REGEX.findall(lines[-1])[0])
 
-    if pylint_score >= 9.00:
-        print(f"Scored {pylint_score}/10, which is higher than the limit: 9.00\n")
+    if pylint_score >= MIN_SCORE:
+        print(f"Scored {pylint_score}/10, which is higher than the limit: {MIN_SCORE}\n")
         sys.exit(0)
     else:
-        print(f"Scored {pylint_score}/10, which is lower than the limit: 9.00\n")
+        print(f"Scored {pylint_score}/10, which is lower than the limit: {MIN_SCORE}\n")
         sys.exit(1)
 
 if __name__ == "__main__":
