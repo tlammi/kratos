@@ -34,10 +34,6 @@ class KratosWebApi {
 
     _wsock_onopen(event){
         console.debug("WebSocket connection connected");
-        for(let key of Object.keys(this._cbs)){
-            let obj = {event: "getTable", target: key};
-            this._wsock.send(JSON.stringify(obj));
-        }
     }
 
     _wsock_onmessage(event) {

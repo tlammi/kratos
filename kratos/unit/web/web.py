@@ -5,13 +5,13 @@ import argparse
 import os
 import datetime
 import logging
+import json
 import bottle
-import sql
-import util
 import gevent.monkey
 import gevent.pywsgi
 import geventwebsocket
 
+import sql
 from . import wshandler
 
 
@@ -75,10 +75,19 @@ def serve_tables(tablename: str, client: sql.Client):
     :return: Table as HTML string
     """
     LOGGER.debug("serving %s", tablename)
-    if tablename == "competitions":
-        return util.to_html_table(*client.competitions().to_header_and_rows())
-
-    return f"<h2>This will contain table &lt;{tablename}&gt;</h2>"
+    if tablename == "Competitions":
+        header, rows = client.competitions().to_header_and_rows()
+    elif tablename == "Competitors":
+        header, rows = client.competitors().to_header_and_rows()
+    elif tablename == "CurrentCompetitors":
+        header, rows = client.current_competitors().to_header_and_rows()
+    else:
+        bottle.abort(400, f"Unknown table '{tablename}'")
+    resp = {}
+    resp["header"] = header
+    resp["rows"] = rows
+    LOGGER.debug("resp: %s", resp)
+    return json.dumps(resp, default=str)
 
 def add_cli_args(_parser: argparse.ArgumentParser):
     """
@@ -89,11 +98,11 @@ def add_cli_args(_parser: argparse.ArgumentParser):
     """
 
 
-def run(args: argparse.Namespace):
+def run(_args: argparse.Namespace):
     """
     Execute webserver
 
-    :param args: Parsed CLI args
+    :param _args: Parsed CLI args
     :return: None
     """
     client = sql.Client("sqlite:///:memory:")

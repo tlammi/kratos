@@ -6,7 +6,8 @@ This document covers the web API (HTTP + websocket) structure and functionality.
 
 - The index page is served in `/` and provides the page used by ofiicials to manage the competitions
 - Scoresheet is served in `/scoresheet` and can be used to view the current status of the competition
-
+- Tables are served in `/tables/<tablename>` in JSON format `{"header": [...], "rows": [[...], [...], ...]}`
+  where "header" contains the table header row and "rows" list of rows in the table.
 ## Tables
 
 The WebSocket interface functions by accessing different tables stored in SQL database. These 
@@ -66,19 +67,12 @@ Websocket communication is used for the real time communication between the serv
 case for this is updating the judge votes asynchronically to the client. Communication is performed with JSON
 formatted data. Client to server messages are denoted with *(C->S)* and server to client messages with *(S->C)*.
 
-### Request a table (C->S)
-This requests the whole table with the specified name.
+### Table Overwritten (S->C)
+This event is fired by the server when a table has been updated completely, e.g. changing active competition
+may completely change the "CurrentCompetitors" table.
 ```JSON
 {
-    "event": "getTable",
-    "target": "<table name>"
-}
-```
-
-### Response to Request a Table (S->C)
-```JSON
-{
-    "event": "getTable",
+    "event": "tableOverwritten",
     "target": "<table name>",
     "header": ["<column 1>", "<column 2>", "..."],
     "rows": [["cell00", "cell01", "..."], ["cell10", "cell11", "..."], "..." ]

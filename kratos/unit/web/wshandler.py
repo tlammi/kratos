@@ -7,14 +7,14 @@ import datetime
 import bottle
 import geventwebsocket
 import sql
-import util
 
 LOGGER = logging.getLogger(__file__)
 
-def competitions_newrow(request: dict, client: sql.Client):
+def competitions_newrow(request: dict, client: sql.Client):  #pylint: disable=missing-function-docstring
     values = request["values"]
     if "CompetitionDate" in values:
-        values["CompetitionDate"] = datetime.datetime.strptime(values["CompetitionDate"], "%Y-%m-%d")
+        values["CompetitionDate"] = \
+            datetime.datetime.strptime(values["CompetitionDate"], "%Y-%m-%d")
     else:
         values["CompetitionDate"] = datetime.date.today()
 
@@ -24,46 +24,39 @@ def competitions_newrow(request: dict, client: sql.Client):
     inserted_element = client.competitions()[maxid]
 
     request["values"] = inserted_element
-    return util.serialize_dict(request)
+    return json.dumps(request, default=str)
 
-
-def competitions_gettable(request: dict, client: sql.Client):
-    header, rows = client.competitions().to_header_and_rows()
-    resp = request
-    resp["header"] = header
-    for index, row in enumerate(rows):
-        for key, val in enumerate(row):
-            if isinstance(val, datetime.date):
-                rows[index][key] = str(val)
-    resp["rows"] = rows
-    LOGGER.debug("resp: %s", resp)
-    return util.serialize_dict(resp)
-
-def competitions_rowmodified(request: dict, client: sql.Client):
+def competitions_rowmodified(request: dict, client: sql.Client):  #pylint: disable=missing-function-docstring
     elem_id = request["id"]
     values = request["values"]
 
     if "CompetitionDate" in values:
-        values["CompetitionDate"] = datetime.datetime.strptime(values["CompetitionDate"], "%Y-%m-%d")
+        values["CompetitionDate"] = \
+            datetime.datetime.strptime(values["CompetitionDate"], "%Y-%m-%d")
     client.competitions().update(elem_id, **values)
     inserted_element = client.competitions()[elem_id]
 
     request["values"] = inserted_element
 
-    responses = [util.serialize_dict(request)]
+    responses = [json.dumps(request, default=str)]
     if "IsActive" in values:
-        responses.append(current_competitors_gettable({
-            "event": "getTable",
-            "target": "CurrentCompetitors"
-        }, client))
+        header, rows = client.current_competitors().to_header_and_rows()
+        responses.append(json.dumps({
+            "event": "tableOverwritten",
+            "target": "CurrentCompetitors",
+            "header": header,
+            "rows": rows
+        }, default=str))
     return responses
+
 
 def competitions_rmrow(request: str, client: sql.Client):
     elem_id = request["id"]
     client.competitions().delete(elem_id)
-    return util.serialize_dict(request)
+    return json.dumps(request, default=str)
 
-def competitors_newrow(request: str, client: sql.Client):
+
+def competitors_newrow(request: str, client: sql.Client):  #pylint: disable=missing-function-docstring
     values = request["values"]
     if "CompetitionID" not in values:
         values["CompetitionID"] = client.competitions().where("IsActive = 1")[0]["ID"]
@@ -73,27 +66,15 @@ def competitors_newrow(request: str, client: sql.Client):
     inserted_element2 = client.current_competitors()[maxid]
     request["values"] = inserted_element
     resp = [
-        util.serialize_dict(request),
-        util.serialize_dict({
+        json.dumps(request, default=str),
+        json.dumps({
             "event": "newRow",
             "target": "CurrentCompetitors",
             "values": inserted_element2
-        })
+        }, default=str)
     ]
-
     return resp
 
-def competitors_gettable(request: dict, client: sql.Client):
-    header, rows = client.competitors().to_header_and_rows()
-    resp = request
-    resp["header"] = header
-    for index, row in enumerate(rows):
-        for key, val in enumerate(row):
-            if isinstance(val, datetime.date):
-                rows[index][key] = str(val)
-    resp["rows"] = rows
-    LOGGER.debug("resp: %s", resp)
-    return json.dumps(resp)
 
 def competitors_rowmodified(request: dict, client: sql.Client):
     elem_id = request["id"]
@@ -103,30 +84,18 @@ def competitors_rowmodified(request: dict, client: sql.Client):
     updated_element = client.competitors()[elem_id]
 
     request["values"] = updated_element
-    return util.serialize_dict(request)
+    return json.dumps(request, default=str)
 
-def current_competitors_gettable(request: dict, client: sql.Client):
-    header, rows = client.current_competitors().to_header_and_rows()
-    resp = request
-    resp["header"] = header
-    resp["rows"] = rows
-    LOGGER.debug("resp: %s", resp)
-    return util.serialize_dict(resp)
 
 WEBSOCKET_HANDLERS = {
     "Competitions": {
         "newRow": competitions_newrow,
-        "getTable": competitions_gettable,
         "rowModified": competitions_rowmodified,
         "rmRow": competitions_rmrow
     },
     "Competitors": {
         "newRow": competitors_newrow,
-        "getTable": competitors_gettable,
         "rowModified": competitors_rowmodified
-    },
-    "CurrentCompetitors": {
-        "getTable": current_competitors_gettable
     }
 }
 
