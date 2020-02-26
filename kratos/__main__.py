@@ -6,6 +6,7 @@ import sys
 import os
 import argparse
 import typing
+import logging
 from dataclasses import dataclass
 
 # This enables both direct and "-m" invocation of kratos
@@ -58,6 +59,10 @@ def parse_cli():
         "empty string means automatic", default=""
     )
 
+    parser.add_argument("-d", "--debug",
+                        help="Print debug prints",
+                        action="store_true")
+
     subparsers = parser.add_subparsers(
         dest="unit", title="units",
         metavar="[" + ", ".join(UNITS.keys()) + "]")
@@ -74,6 +79,11 @@ def parse_cli():
 
 def main():
     args = parse_cli()
+
+    if args.debug:
+        logging.basicConfig()
+        logging.getLogger().setLevel(logging.DEBUG)
+
     UNITS[args.unit].run(args)
 
 
