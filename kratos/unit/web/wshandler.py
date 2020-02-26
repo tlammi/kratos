@@ -86,6 +86,10 @@ def competitors_rowmodified(request: dict, client: sql.Client):
     request["values"] = updated_element
     return json.dumps(request, default=str)
 
+def competitors_rmrow(request: dict, client: sql.Client):
+    elem_id = request["id"]
+    client.competitors().delete(elem_id)
+    return json.dumps(request, default=str)
 
 WEBSOCKET_HANDLERS = {
     "Competitions": {
@@ -95,7 +99,8 @@ WEBSOCKET_HANDLERS = {
     },
     "Competitors": {
         "newRow": competitors_newrow,
-        "rowModified": competitors_rowmodified
+        "rowModified": competitors_rowmodified,
+        "rmRow": competitors_rmrow
     }
 }
 

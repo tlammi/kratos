@@ -50,10 +50,6 @@ class CompetitionTable {
             this.delete_handler(id);
         }, "Delete");
 
-        div.appendChild(activate_button.dom());
-        div.appendChild(modify_button.dom());
-        div.appendChild(delete_button.dom());
-
         if (Array.isArray(new_row)) {
             new_row.push(div);
         } else {
@@ -219,8 +215,8 @@ class CompetitorTable {
         );
 
         this._tbl = new Table(document.getElementById(container_id), 0,
-            ["ID", "LastName", "FirstNames", "BodyWeight", "Sex"],
-            ["ID", "Last Name", "First Names", "Body Weight", "Sex"])
+            ["ID", "LastName", "FirstNames", "BodyWeight", "Sex", "Delete"],
+            ["ID", "Last Name", "First Names", "Body Weight", "Sex", "Delete"])
 
 
         this._tbl.on_cell_modified = (x, y, data) => {
@@ -234,11 +230,26 @@ class CompetitorTable {
             this._api.send_table_event(obj);
             console.log("Modified (" + x + ", " + y + "): " + data);
         }
-        this._tbl.set_rw_mask([false, true, true, true, true]);
-        this._tbl.set_visible_mask([true, true, true, true, true]);
+        this._tbl.set_rw_mask([false, true, true, true, true, false]);
+        this._tbl.set_visible_mask([true, true, true, true, true, true]);
     }
 
     add_competitor(new_row) {
+
+        let id = new_row[0];
+        if(id === undefined)
+            id = new_row["ID"];
+
+        let div = document.createElement("div");
+
+        let button = new Button(div, () => {
+            this.delete_competitor_handler(id);
+        }, "Delete");
+        if(new_row instanceof Array) {
+            new_row.push(div);
+        } else {
+            new_row["Delete"] = div;
+        }
         this._tbl.append(new_row);
     }
 
@@ -256,8 +267,18 @@ class CompetitorTable {
         this._tbl.replace_row(id, values);
     }
 
+    remove_competitor(id) {
+        console.debug("Removing element " + id + " from current competitors");
+        this._tbl.delete_row(id);
+    }
+
     clear() {
         this._tbl.clear();
+    }
+
+    delete_competitor_handler(id) {
+        let obj = {"event": "rmRow", "target": "Competitors", "id": id};
+        this._api.send_table_event(obj);
     }
 };
 
@@ -301,6 +322,10 @@ kratos_api.table_event_handler("CurrentCompetitors", "newRow", (obj) => {
 
 kratos_api.table_event_handler("Competitors", "rowModified", (obj) => {
     competitor_tbl.replace_competitor(obj.id, obj.values);
+});
+
+kratos_api.table_event_handler("Competitors", "rmRow", (obj) => {
+    competitor_tbl.remove_competitor(obj.id);
 });
 
 kratos_api.table_event_handler("CurrentCompetitors", "tableOverwritten", (obj) => {
