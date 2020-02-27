@@ -53,7 +53,10 @@ class TableView:
         :return: The matching row
         """
         s = sqlalchemy.select([self._table]).where(getattr(self._table.c, self._index_col) == item)
-        return util.sql_result_to_dicts(self._conn.execute(s))[0]
+        try:
+            return util.sql_result_to_dicts(self._conn.execute(s))[0]
+        except IndexError:
+            raise IndexError(f"Could not find {item} on column {self._index_col}")
 
     def max_id(self):
         """
@@ -64,7 +67,10 @@ class TableView:
         :return: Maximum ID
         """
         s = sqlalchemy.select([func.max(getattr(self._table.c, self._index_col))])
-        return self._conn.execute(s).fetchall()[0][0]
+        res = self._conn.execute(s).fetchall()[0][0]
+        if res is None:
+            raise IndexError("Could not get max ID, table is likely empty")
+        return res
 
     def append(self, **kwargs):
         """

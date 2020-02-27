@@ -107,21 +107,6 @@ class Client:
         """
         return joinedtableview.JoinedTableView(self.CURRENT_COMPETITION_QUERY, self._conn, "ID")
 
-    def get_current_competitors(self):
-        """
-        Competitor list in the current competition
-        """
-        query = sqlalchemy.text(
-            """
-            WITH CurrentCompetitions AS (SELECT * FROM Competitions WHERE IsActive = 1)
-            SELECT *
-            FROM CurrentCompetitions JOIN Competitors
-                ON CurrentCompetitions.ID = Competitors.CompetitionID
-            """
-        )
-
-        return util.sql_result_to_header_and_rows(self._conn.execute(query))
-
     def attempts(self):
         """
         View of the attempts
@@ -129,56 +114,3 @@ class Client:
         :return: TableView pointing to attempts
         """
         return tableview.TableView(self._attempts, self._conn, "ID")
-
-    def get_active_competition_table(self, competition_id: int):
-        """
-        Helper method for acquiring table used for active competition management
-
-        :param competition_id: Current competition ID, used for filtering the results
-        :return: Tuple of (<list of column names>, <list of rows>)
-        """
-        query = sqlalchemy.text(
-            f"""
-            WITH
-                snatches AS (SELECT * FROM Attempts WHERE Discipline = "Snatch"),
-                snatch1 AS (SELECT * FROM snatches WHERE Number = 1),
-                snatch2 AS (SELECT * FROM snatches WHERE Number = 2),
-                snatch3 AS (SELECT * FROM snatches WHERE Number = 3),
-                cjs AS (SELECT * FROM Attempts WHERE Discipline = "C&J"),
-                cj1 AS (SELECT * FROM cjs WHERE Number = 1),
-                cj2 AS (SELECT * FROM cjs WHERE Number = 2),
-                cj3 AS (SELECT * FROM cjs WHERE Number = 3),
-                flat_attempts AS (
-                    SELECT
-                        snatch1.CompetitorID as "CompetitorID",
-                        snatch1.Status AS "Snatch1Status",
-                        snatch1.Result AS "Snatch1Result",
-                        snatch1.Unit AS "Snatch1Unit",
-                        snatch2.Status AS "Snatch2Status",
-                        snatch2.Result AS "Snatch2Result",
-                        snatch2.Unit AS "Snatch2Unit",
-                        snatch3.Status AS "Snatch3Status",
-                        snatch3.Result AS "Snatch3Result",
-                        snatch3.Unit AS "Snatch3Unit",
-                        cj1.Status AS "CJ1Status",
-                        cj1.Result AS "CJ1Result",
-                        cj1.Unit AS "CJ1Unit",
-                        cj2.Status AS "CJ2Status",
-                        cj2.Result AS "CJ2Result",
-                        cj2.Unit AS "CJ2Unit",
-                        cj3.Status AS "CJ3Status",
-                        cj3.Result AS "CJ3Result",
-                        cj3.Unit AS "CJ3Unit"
-                    FROM snatch1 JOIN snatch2 ON snatch1.CompetitorID = snatch2.CompetitorID
-                        JOIN snatch3 ON snatch2.CompetitorID = snatch3.CompetitorID
-                        JOIN cj1 ON snatch3.CompetitorID = cj1.CompetitorID
-                        JOIN cj2 ON cj1.CompetitorID = cj2.CompetitorID
-                        JOIN cj3 ON cj2.CompetitorID = cj3.CompetitorID
-                )
-            SELECT *
-            FROM Competitors JOIN flat_attempts ON Competitors.ID = flat_attempts.CompetitorID
-            WHERE Competitors.CompetitionID = {competition_id}
-            """
-        )
-
-        return util.sql_result_to_header_and_rows(self._conn.execute(query))
