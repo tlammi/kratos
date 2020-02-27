@@ -3,18 +3,18 @@ Script for executing the integration tests
 """
 import os
 import sys
-import robot
 import argparse
-
+import robot
 
 THISDIR = os.path.dirname(os.path.realpath(__file__))
-TESTDIR = os.path.join(THISDIR, "tests")
-OUTPUTDIR = os.path.join(THISDIR, "reports")
+INTEGRATION_TEST_DIR = os.path.join(THISDIR, "../integration_test")
+TESTDIR = os.path.join(INTEGRATION_TEST_DIR, "tests")
+OUTPUTDIR = os.path.join(INTEGRATION_TEST_DIR, "reports")
 
 PYTHONPATH = [
-    os.path.dirname(THISDIR),
-    os.path.join(THISDIR, "python"),
-    os.path.join(THISDIR, "robot")
+    os.path.dirname(INTEGRATION_TEST_DIR),
+    os.path.join(INTEGRATION_TEST_DIR, "python"),
+    os.path.join(INTEGRATION_TEST_DIR, "robot")
 ]
 
 ARGS = [

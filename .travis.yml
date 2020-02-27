@@ -21,12 +21,12 @@ jobs:
       - sudo mv chromedriver /usr/bin/
       before_script:
       - python3 -m pip install -r requirements.txt
-      - python3 -m pip install -r integration_test/requirements.txt
-      script: python3 ./integration_test/run_tests.py
+      - python3 -m pip install -r requirements_integration_test.txt
+      script: python3 ./script/run_robot.py
     - name: "Unit Tests"
       before_script:
       - python3 -m pip install -r requirements.txt
-      - python3 -m pip install -r script/requirements.txt
+      - python3 -m pip install -r requirements_unit_test.txt
       script: python3 ./script/run_pytest.py
       after_script: coveralls
     - name: "Pylint"
