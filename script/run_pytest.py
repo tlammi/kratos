@@ -15,6 +15,11 @@ PYTEST_ARGS = ["--cov=%s/../kratos" % THISDIR,
                "--cov-config=%s/covrc" % THISDIR,
                "%s/../kratos" % THISDIR]
 
+if len(sys.argv) == 2:
+    PYTEST_ARGS[-1] = sys.argv[-1]
+elif len(sys.argv) > 2:
+    raise ValueError("Usage: py run_pylint.py [PATH]")
+
 # Modify path to get imports correct
 sys.path.insert(0, os.path.join(THISDIR, "../kratos"))
 

@@ -19,12 +19,6 @@ THISDIR = os.path.dirname(os.path.realpath(__file__))
 HTML_DIR = os.path.join(THISDIR, "html")
 HTML_FILE = os.path.join(HTML_DIR, "index.html")
 
-
-LIFTER_TABLE_HEADERS = ["Last Name", "First Names", "Body Weight",
-                        "Snatch 1", "Snatch 2", "Snatch 3",
-                        "C&J 1", "C&J 2", "C&J 3",
-                        "Tot", "Sinclair"]
-
 LOGGER = logging.getLogger(__file__)
 
 def serve_index():
