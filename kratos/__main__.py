@@ -12,6 +12,7 @@ from dataclasses import dataclass
 # This enables both direct and "-m" invocation of kratos
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
+#pylint: disable=wrong-import-position
 import unit.debugsub
 import unit.judge
 import unit.web

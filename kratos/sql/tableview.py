@@ -82,12 +82,12 @@ class TableView:
         i = self._table.insert().values(**kwargs)
         self._conn.execute(i)
 
-    def update(self, id, **kwargs):
+    def update(self, elem_id, **kwargs):
         """
         Update values in table
         """
         u = self._table.update().where(
-            getattr(self._table.c, self._index_col) == id).values(**kwargs)
+            getattr(self._table.c, self._index_col) == elem_id).values(**kwargs)
         self._conn.execute(u)
 
     def where(self, expression: str):

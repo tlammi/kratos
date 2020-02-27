@@ -37,7 +37,8 @@ class JoinedTableView:
         """
         Get table data as a tuple of header and rows
 
-        :return: tuple of list and list of lists, where the first values is a list representing the header
+        :return: tuple of list and list of lists,
+            where the first values is a list representing the header
             and the second value a list of table rows
         """
         return util.sql_result_to_header_and_rows(self._conn.execute(self._query))

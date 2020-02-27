@@ -42,16 +42,16 @@ class Client:
         :param url: URL used to reach the SQL database
         :param debug: Echo the operations if True
         """
-        self._engine = create_engine(url, echo=debug)
-        self._meta = MetaData()
+        engine = create_engine(url, echo=debug)
+        meta = MetaData()
 
-        self._competitions = Table("Competitions", self._meta,
+        self._competitions = Table("Competitions", meta,
                                    Column("ID", Integer, primary_key=True),
                                    Column("Name", NVARCHAR),
                                    Column("CompetitionDate", Date),
                                    Column("IsActive", Boolean, default=False))
 
-        self._competitors = Table("Competitors", self._meta,
+        self._competitors = Table("Competitors", meta,
                                   Column("ID", Integer, primary_key=True),
                                   Column("CompetitionID", Integer),
                                   Column("CategoryID", Integer),
@@ -61,16 +61,16 @@ class Client:
                                   Column("BodyWeight", Integer),
                                   Column("Sex", CHAR))
 
-        self._groups = Table("Groups", self._meta,
+        self._groups = Table("Groups", meta,
                              Column("ID", Integer, primary_key=True),
                              Column("CID", Integer),
                              Column("Name", NVARCHAR))
 
-        self._categories = Table("Categories", self._meta,
+        self._categories = Table("Categories", meta,
                                  Column("ID", Integer),
                                  Column("Name", NVARCHAR))
 
-        self._attempts = Table("Attempts", self._meta,
+        self._attempts = Table("Attempts", meta,
                                Column("ID", Integer, primary_key=True),
                                Column("CompetitorID", Integer),
                                Column("Status", NVARCHAR),
@@ -78,9 +78,8 @@ class Client:
                                Column("Discipline", NVARCHAR),
                                Column("Result", Integer),
                                Column("Unit", NVARCHAR))
-
-        self._meta.create_all(self._engine)
-        self._conn = self._engine.connect()
+        meta.create_all(engine)
+        self._conn = engine.connect()
 
     def competitions(self):
         """
