@@ -5,6 +5,7 @@ import logging
 import json
 import datetime
 import bottle
+import copy
 import geventwebsocket
 import sql
 
@@ -24,7 +25,7 @@ def competitions_newrow(request: dict, client: sql.Client):  #pylint: disable=mi
     inserted_element = client.competitions()[maxid]
 
     request["values"] = inserted_element
-    return json.dumps(request, default=str)
+    return [request]
 
 def competitions_rowmodified(request: dict, client: sql.Client):  #pylint: disable=missing-function-docstring
     elem_id = request["id"]
@@ -38,41 +39,57 @@ def competitions_rowmodified(request: dict, client: sql.Client):  #pylint: disab
 
     request["values"] = inserted_element
 
-    responses = [json.dumps(request, default=str)]
+    responses = [request]
     if "IsActive" in values:
         header, rows = client.current_competitors().to_header_and_rows()
-        responses.append(json.dumps({
+        responses.append({
             "event": "tableOverwritten",
             "target": "CurrentCompetitors",
             "header": header,
             "rows": rows
-        }, default=str))
+        })
     return responses
 
 
 def competitions_rmrow(request: str, client: sql.Client):
     elem_id = request["id"]
+    response = [request.copy()]
+    if client.competitions()[elem_id]["IsActive"]:
+        client.competitions()[elem_id].update(IsActive=False)
+        h, r = client.current_competitors().to_header_and_rows()
+        response.append(
+            {
+                "event": "tableOverwritten",
+                "target": "CurrentCompetitors",
+                "header": h,
+                "rows": r
+            }
+        )
     client.competitions().delete(elem_id)
-    return json.dumps(request, default=str)
+    return response
 
 
 def competitors_newrow(request: str, client: sql.Client):  #pylint: disable=missing-function-docstring
     values = request["values"]
     if "CompetitionID" not in values:
         values["CompetitionID"] = client.competitions().where("IsActive = 1")[0]["ID"]
+
     client.competitors().append(**values)
     maxid = client.competitors().max_id()
-    inserted_element = client.competitors()[maxid]
-    inserted_element2 = client.current_competitors()[maxid]
-    request["values"] = inserted_element
-    resp = [
-        json.dumps(request, default=str),
-        json.dumps({
+    competition_id = client.competitors()[maxid]["CompetitionID"]
+    resp =  [
+        {
+            "event": "newRow",
+            "target": "Competitors",
+            "values": client.competitors()[maxid]
+        }
+    ]
+    if client.competitions()[competition_id]["IsActive"]:
+        resp.append({
             "event": "newRow",
             "target": "CurrentCompetitors",
-            "values": inserted_element2
-        }, default=str)
-    ]
+            "values": client.current_competitors()[maxid]
+        })
     return resp
 
 
@@ -82,14 +99,34 @@ def competitors_rowmodified(request: dict, client: sql.Client):
 
     client.competitors().update(elem_id, **values)
     updated_element = client.competitors()[elem_id]
-
     request["values"] = updated_element
-    return json.dumps(request, default=str)
+    resp = [request]
+    competition_id = client.competitors()[elem_id]["CompetitionID"]
+
+    if client.competitions()[competition_id]["IsActive"]:
+        resp.append(
+            {
+                "event": "rowModified",
+                "target": "CurrentCompetitors",
+                "id": elem_id,
+                "values": client.current_competitors()[elem_id]
+            }
+        )
+
+    return resp
 
 def competitors_rmrow(request: dict, client: sql.Client):
     elem_id = request["id"]
+    competition_id = client.competitors()[elem_id]["CompetitionID"]
+    response = [request]
+    if client.competitions()[competition_id]["IsActive"]:
+        tmp = copy.deepcopy(request)
+        tmp["target"] = "CurrentCompetitors"
+        response.append(
+            tmp
+        )
     client.competitors().delete(elem_id)
-    return json.dumps(request, default=str)
+    return response
 
 WEBSOCKET_HANDLERS = {
     "Competitions": {
@@ -130,10 +167,8 @@ def serve_websocket(client: sql.Client):
                 try:
                     resp = WEBSOCKET_HANDLERS[target][event](json_request, client)
                     LOGGER.info("Sending response: %s", resp)
-                    if not isinstance(resp, (list, tuple)):
-                        resp = [resp]
                     for r in resp:
-                        wsock.send(r)
+                        wsock.send(json.dumps(r, default=str))
                 except KeyError:
                     LOGGER.error("Unkown target %s or event %s", target, event)
                     raise
