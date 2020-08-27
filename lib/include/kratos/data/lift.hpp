@@ -11,8 +11,8 @@ struct Lift{
 		Fail
 	};
 
-	Weight weight;
-	Status status;
+	Weight weight{};
+	Status status{};
 };
 }
 }

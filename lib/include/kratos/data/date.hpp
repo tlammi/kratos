@@ -27,7 +27,7 @@ public:
 		return year < rhs.year;
 	}
 
-	bool operator>(conts Date& rhs) const {
+	bool operator>(const Date& rhs) const {
 		if(year == rhs.year){
 			if(month == rhs.month)
 				return day > rhs.day;

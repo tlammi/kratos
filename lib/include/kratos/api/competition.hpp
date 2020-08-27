@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 namespace kratos{
 namespace api{
 class Competition{
