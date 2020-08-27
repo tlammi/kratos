@@ -2,16 +2,16 @@
 
 namespace kratos{
 namespace api{
-class CompetitionApi;
+class Competition;
 
-class GroupApi{
-friend class CompetitionApi;
+class Group{
+friend class Competition;
 public:
 	int create();
 	void remove(int id);
 
 private:
-	GroupApi();
+	Group();
 };
 }
 }

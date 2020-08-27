@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kratos/api/competition_api.hpp"
-#include "kratos/api/group_api.hpp"
-#include "kratos/group.hpp"
-#include "kratos/competitor.hpp"
+#include "kratos/api/competition.hpp"
+#include "kratos/api/group.hpp"
+#include "kratos/data/group.hpp"
+#include "kratos/data/competitor.hpp"
 
