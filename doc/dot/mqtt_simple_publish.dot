@@ -1,5 +1,0 @@
-digraph mqtt_top {
-	Publisher -> Broker;
-	Broker -> Subscriber;
-    rankdir = "LR"
-}
