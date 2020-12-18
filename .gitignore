@@ -1,9 +1,5 @@
-# Byte code
-*.pyc
 
-# Coverage reports
-htmlcov/*
-.coverage
+build
 
 # VS code configuration
 .vscode
