@@ -23,3 +23,9 @@ clean:
 cleanall:
 	rm -rf build/$(HOST)
 
+run-qt: ninja
+	cd build/$(HOST) && frontend/qt/kratos-qt
+	
+run-cli: ninja
+	cd build/$(HOST) && frontend/cli/kratos-cli
+
