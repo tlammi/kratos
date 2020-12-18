@@ -11,8 +11,13 @@ endif
 default: ninja
 
 
-build/$(HOST)/build.ninja:
+build/linux/build.ninja:
 	meson --default-library=static build/$(HOST)
+
+# Meson's qt5 module has a bug with debug build when building with mingw.
+# Therefore a release build
+build/windows/build.ninja:
+	meson --default-library=static --buildtype=release build/$(HOST)
 
 ninja: build/$(HOST)/build.ninja
 	cd build/$(HOST) && ninja
@@ -24,8 +29,8 @@ cleanall:
 	rm -rf build/$(HOST)
 
 run-qt: ninja
-	cd build/$(HOST) && frontend/qt/kratos-qt
+	build/$(HOST)/frontend/qt/kratos-qt
 	
 run-cli: ninja
-	cd build/$(HOST) && frontend/cli/kratos-cli
+	build/$(HOST)/frontend/cli/kratos-cli
 
