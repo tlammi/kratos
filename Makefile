@@ -29,7 +29,7 @@ cleanall:
 	rm -rf build/$(HOST)
 
 run-qt: ninja
-	build/$(HOST)/frontend/qt/kratos-qt
+	cd frontend/qt/qml && ../../../build/$(HOST)/frontend/qt/kratos-qt
 	
 run-cli: ninja
 	build/$(HOST)/frontend/cli/kratos-cli

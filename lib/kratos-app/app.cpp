@@ -4,7 +4,7 @@ namespace kratos{
 
 App::App(){}
 
-Event App::event() const {
+Event App::new_event() const {
 	return Event();
 }
 }

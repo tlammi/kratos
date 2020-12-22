@@ -5,7 +5,8 @@ namespace kratos{
 
 Event::Event(){}
 
-const std::string& Event::name() const{
-	return name_;
+NameView& Event::name_view(){
+	return name_view_;
 }
+
 }

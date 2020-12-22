@@ -1,3 +1,3 @@
 
-kratos_app = library('kratos-app', 'src/app.cpp', 'src/event.cpp')
+kratos_app = library('kratos-app', 'app.cpp', 'event.cpp', 'nameview.cpp')
 

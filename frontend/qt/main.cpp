@@ -1,3 +1,4 @@
+
 #include <QGuiApplication>
 #include <QQuickView>
 #include <QQuickItem>
@@ -5,33 +6,36 @@
 #include <thread>
 #include <iostream>
 
+#include "myclass.moc"
+#include "MutableHeaderTableModel.moc"
+
+
 using namespace std::literals::chrono_literals;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 	int res = -1;
-	try
-	{
+	try {
 		QGuiApplication app{argc, argv};
+
+		qmlRegisterType<MutableHeaderTableModel>("MutableHeaderTableModel", 0, 1, "MutableHeaderTableModel");
+
 		QQmlApplicationEngine engine("main.qml");
-		/*QQuickView view;
-		view.setSource(QUrl::fromLocalFile("main.qml"));
-		view.show();
-		QQuickItem *obj = view.rootObject();
-		obj->setProperty("width", 500);
-		QQuickItem *text = obj->findChild<QQuickItem *>("text");
-	for (size_t i = 0; i < 10; ++i)
-	{
-		std::string tmp = std::to_string(i);
-		text->setProperty("text", tmp.c_str());
-		std::this_thread::sleep_for(1s);
-		app.processEvents();
-	}
-	*/
+		QObject* root = engine.rootObjects()[0];
+		auto name_field = root->findChild<QObject*>("competitorConfigTable");
+		MyClass my_class{};
+		QObject::connect(name_field, SIGNAL(itemModified(int, int, QString)), &my_class, SLOT(my_slot(int, int, QString)));
+		MutableHeaderTableModel* model = root->findChild<MutableHeaderTableModel*>("asd");
+		model->insertColumns(0, 2);
+		model->setHeaderData(0, Qt::Horizontal,QString("hello"));
+		model->setHeaderData(1, Qt::Horizontal, QString("world"));
+		model->insertRows(0, 2);
+
+		auto view = root->findChild<QObject*>("asHeader");
+		QMetaObject::invokeMethod(view, "forceLayout");
+		
 		res = app.exec();
 	}
-	catch (const std::runtime_error &e)
-	{
+	catch (const std::runtime_error &e) {
 		std::cerr << e.what() << '\n';
 		return 1;
 	}

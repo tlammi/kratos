@@ -5,5 +5,5 @@
 int main(){
 	
 	kratos::App a;
-	std::cerr << a.event().name() << '\n';
+	std::cerr << "asdf"<< '\n';
 }
