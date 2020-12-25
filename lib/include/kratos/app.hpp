@@ -10,7 +10,7 @@ class App{
 public:
 	App();
 
-	Event new_event() const ;
+	Event new_event() const;
 
 	Event load_event(const std::filesystem::path& src);
 

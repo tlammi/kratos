@@ -15,13 +15,13 @@ class MutableHeaderTableModel: public QAbstractTableModel {
 public:
 
 	int rowCount(const QModelIndex& = QModelIndex()) const final {
-		return data_.size();
-	}
-
-	int columnCount(const QModelIndex& = QModelIndex()) const final {
 		if(data_.size())
 			return data_[0].size();
 		return 0;
+	}
+
+	int columnCount(const QModelIndex& = QModelIndex()) const final {
+		return data_.size();
 	}
 
 	QVariant data(const QModelIndex& index, int role) const final {
