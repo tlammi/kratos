@@ -4,6 +4,7 @@ import Qt.labs.qmlmodels 1.0
 
 Rectangle{
     anchors.fill: parent
+
     Rectangle{
         id: tlAlign
         anchors.top: parent.top
@@ -12,9 +13,10 @@ Rectangle{
         width: 10
         color: "blue"
     }
+
     HeaderTable{
-	    objectName: "competitorConfigTable"
 	    anchors.fill: parent
+	    objectName: "asdf"
     }
     
 }

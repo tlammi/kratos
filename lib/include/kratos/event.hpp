@@ -4,18 +4,19 @@
 #include <string_view>
 #include <iostream>
 
-#include "kratos/nameview.hpp"
+
+#include "kratos/competition.hpp"
 
 namespace kratos{
 
 class Event{
 public:
 	Event();
-
-	NameView& name_view();
+	constexpr std::string_view name() const {
+		return "Dummy Event";
+	}
 
 private:
-	NameView name_view_{};
 };
 }
 

@@ -1,3 +1,3 @@
 
-kratos_app = library('kratos-app', 'app.cpp', 'event.cpp', 'nameview.cpp')
+kratos_app = library('kratos-app', 'app.cpp', 'event.cpp', 'competition.cpp', 'weightlifting.cpp')
 

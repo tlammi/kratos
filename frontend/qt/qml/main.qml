@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.15
 
+
 ApplicationWindow{
     id: root
     visible: true
@@ -25,7 +26,6 @@ ApplicationWindow{
                 TabButton{ text: "Competition" }
             }
             StackLayout {
-                id: stackLayout
                 anchors.right: parent.right
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
@@ -35,7 +35,8 @@ ApplicationWindow{
                     KratosConfigView{}
                 }
                 Item{
-                    KratosCompetitorView{}
+			KratosCompetitorView{
+			}
                 }
 
                 Item{
