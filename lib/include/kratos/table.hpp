@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include "kratos/row.hpp"
 
 namespace kratos{
@@ -32,6 +34,13 @@ public:
 	}
 	size_t width() const noexcept {
 		return column_names_.size();
+	}
+
+	void sort_by(std::string_view col){
+		std::stable_sort(rows_.begin(), rows_.end(),
+			[&](const auto& lhs, const auto& rhs){
+				return lhs[col] < rhs[col];	
+			});
 	}
 private:
 	std::vector<std::string_view> column_names_{};

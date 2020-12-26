@@ -8,7 +8,7 @@ namespace kratos{
 class Row{
 public:
 
-	Row(const std::vector<std::string_view>& header): header_{header}{
+	Row(const std::vector<std::string_view>& header): header_{&header}{
 		for(const auto& h : header){
 			map_[h] = {};
 		}
@@ -18,12 +18,21 @@ public:
 		return map_.at(key);
 	}
 
+	const std::string& operator[](std::string_view key) const {
+		return map_.at(key);
+	}
+
 	std::string& operator[](size_t i) {
-		return map_.at(header_.at(i));
+		return map_.at(header_->at(i));
+	}
+
+	const std::string& operator[](size_t i) const {
+		return map_.at(header_->at(i));
 	}
 
 private:
-	const std::vector<std::string_view>& header_;
+	const std::vector<std::string_view>* header_;
 	std::map<std::string_view, std::string> map_{};
 };
+
 }

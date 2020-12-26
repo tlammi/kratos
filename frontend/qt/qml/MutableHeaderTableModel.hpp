@@ -54,6 +54,11 @@ public:
 		endInsertRows();
 	}
 
+	Q_INVOKABLE void sort(){
+		tbl_->sort_by("Last Name");
+		layoutChanged();
+	}
+
 	bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole) final {
 		switch(role){
 			case Qt::EditRole:

@@ -44,7 +44,8 @@ Rectangle{
 	    id: phButton1
 	    anchors.top: middleAlign.bottom
 	    anchors.left: buttonAlign1.right
-	    text: "Placeholder Button"
+	    text: "Sort"
+	    onClicked: headerTable.model.sort()
     }
     Rectangle{
 	    id: buttonAlign2
