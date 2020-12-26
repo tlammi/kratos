@@ -15,8 +15,46 @@ Rectangle{
     }
 
     HeaderTable{
-	    anchors.fill: parent
+	    id: headerTable
+	    anchors.top: tlAlign.bottom
+	    anchors.left: tlAlign.right
 	    objectName: "asdf"
+	    height: parent.height-300
+	    width: parent.width-300
+    }
+
+    Rectangle{
+	    id: middleAlign
+	    anchors.top: headerTable.bottom
+	    height: 10
+    }
+    Button {
+	    id: addButton
+	    anchors.top: middleAlign.bottom
+	    anchors.left: tlAlign.right
+	    onClicked: headerTable.model.appendRow()
+	    text: "Add"
+    }
+    Rectangle{
+	    id: buttonAlign1
+	    anchors.left: addButton.right
+	    width: 10
+    }
+    Button {
+	    id: phButton1
+	    anchors.top: middleAlign.bottom
+	    anchors.left: buttonAlign1.right
+	    text: "Placeholder Button"
+    }
+    Rectangle{
+	    id: buttonAlign2
+	    anchors.left: phButton1.right
+	    width: 10
+    }
+    Button {
+	    anchors.top: middleAlign.bottom
+	    anchors.left: buttonAlign2.right
+	    text: "Placeholder Button"
     }
     
 }

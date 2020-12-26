@@ -47,6 +47,13 @@ public:
 		return QVariant();
 	}
 
+	Q_INVOKABLE void appendRow(){
+		QModelIndex parent{};
+		beginInsertRows(parent, tbl_->height(), tbl_->height()); 
+		tbl_->append_row();
+		endInsertRows();
+	}
+
 	bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole) final {
 		switch(role){
 			case Qt::EditRole:
@@ -59,7 +66,7 @@ public:
 		return false;
 	}
 
-	Q_INVOKABLE QVariant headerData(int section, Qt::Orientation, int role) const final {
+	QVariant headerData(int section, Qt::Orientation, int role) const final {
 		switch(role){
 			case Qt::DisplayRole:
 				if(tbl_){

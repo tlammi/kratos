@@ -17,6 +17,7 @@ public:
 	void append_row(){
 		rows_.emplace_back(column_names_);
 	}
+
 	const std::vector<std::string_view>& header(){
 		return column_names_;
 	}
