@@ -29,18 +29,14 @@ int main(int argc, char **argv) {
 		auto competitor_config_table = root->findChild<QObject*>("asdf");
 		auto model = competitor_config_table->property("model").value<MutableHeaderTableModel*>();
 
-		const auto& header = event.config_table().header();
+		event.config_table().append_row();
+		event.config_table()[0]["Last Name"] = "     Esimerkki     ";
+		event.config_table()[0]["First Name"] = "        Erkki         ";
 
-		model->insertColumns(0, header.size());
-		for(size_t i=0; i < header.size(); ++i){
-			model->setHeaderData(i, Qt::Horizontal, QString::fromUtf8(header[i].data(), header[i].size()));
-		}
-		/*
-		model->setHeaderData(0, Qt::Horizontal, "hello");
-		model->setHeaderData(1, Qt::Horizontal, "world");
-		*/
-		//model->insertRows(0, header.size());
-		model->insertRows(0, 2);
+		model->setTable(&event.config_table());
+
+		event.config_table()[0]["Body Weight"] = "80.0kg";
+
 		res = app.exec();
 	}
 	catch (const std::runtime_error &e) {

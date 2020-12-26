@@ -7,27 +7,40 @@
 #include <QVector>
 #include <QString>
 
+#include "kratos/table.hpp"
 
 class MutableHeaderTableModel: public QAbstractTableModel {
 	Q_OBJECT
 	QML_ELEMENT
 	QML_ADDED_IN_MINOR_VERSION(1)
 public:
+	
+	void setTable(kratos::Table* tbl){
+		QModelIndex parent{};
+		beginInsertRows(parent, 0, tbl->height()-1);
+		beginInsertColumns(parent, 0, tbl->width()-1);
+		tbl_ = tbl;
+		endInsertColumns();
+		endInsertRows();
+	}
 
 	int rowCount(const QModelIndex& = QModelIndex()) const final {
-		if(data_.size())
-			return data_[0].size();
+		if(tbl_) return tbl_->height();
 		return 0;
 	}
 
 	int columnCount(const QModelIndex& = QModelIndex()) const final {
-		return data_.size();
+		if(tbl_) return tbl_->width();
+		return 0;
 	}
 
 	QVariant data(const QModelIndex& index, int role) const final {
 		switch(role){
 			case Qt::DisplayRole:
-				return data_.at(index.column()).at(index.row());
+				if(tbl_){
+					std::string_view str = (*tbl_)[index.row()][index.column()];
+					return QString::fromUtf8(str.data(), str.size());
+				}
 			default:
 				break;
 		}
@@ -37,8 +50,8 @@ public:
 	bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole) final {
 		switch(role){
 			case Qt::EditRole:
-				data_[index.column()][index.row()] = value;
-				dataChanged(index, index,{role});
+				if(tbl_) (*tbl_)[index.row()][index.column()] = value.toString().toStdString();
+				dataChanged(index, index, {role});
 				return true;
 			default:
 				break;
@@ -49,7 +62,10 @@ public:
 	Q_INVOKABLE QVariant headerData(int section, Qt::Orientation, int role) const final {
 		switch(role){
 			case Qt::DisplayRole:
-				return header_data_.at(section);
+				if(tbl_){
+					std::string_view str = tbl_->header().at(section);
+					return QString::fromUtf8(str.data(), str.size());
+				}
 			default:
 				break;
 		}
@@ -59,9 +75,7 @@ public:
 	bool setHeaderData(int section, Qt::Orientation orientation, const QVariant& data, int role=Qt::EditRole) final {
 		switch(role){
 			case Qt::EditRole:
-				header_data_[section] = data;
-				headerDataChanged(orientation, section, section);
-				return true;
+				break;
 			default:
 				break;
 		}
@@ -78,6 +92,8 @@ public:
 	}
 
 	bool insertRows(int row, int count, const QModelIndex& parent= QModelIndex()) final {
+		return false;
+		/*
 		beginInsertRows(parent, row, row+count-1);
 		for(auto& column: data_){
 			auto iter = column.begin() + row;
@@ -85,9 +101,12 @@ public:
 		}
 		endInsertRows();
 		return true;
+		*/
 	}
 
 	bool removeRows(int row, int count, const QModelIndex& parent= QModelIndex()) final {
+		return false;
+		/*
 		beginRemoveRows(parent, row, row+count-1);
 		for(auto& column: data_){
 			auto begin = column.begin()+row;
@@ -96,9 +115,12 @@ public:
 		}
 		endRemoveRows();
 		return true;
+		*/
 	}
 
 	bool insertColumns(int column, int count, const QModelIndex& parent= QModelIndex()) final {
+		return false;
+		/*
 		beginInsertColumns(parent, column, column+count-1);
 		auto iter = data_.begin()+column;
 		data_.insert(iter, count, {});
@@ -106,9 +128,12 @@ public:
 		header_data_.insert(hiter, count, {});
 		endInsertColumns();
 		return true;
+		*/
 	}
 
 	bool removeColumns(int column, int count, const QModelIndex& parent= QModelIndex()) final {
+		return false;
+		/*
 		beginRemoveColumns(parent, column, column+count-1);
 		auto begin = data_.begin()+column;
 		auto end = begin + count;
@@ -118,10 +143,10 @@ public:
 		header_data_.erase(hbegin, hend);
 		endRemoveColumns();
 		return true;
+		*/
 	}
 
 private:
-	QVector<QVariant> header_data_{};
-	QVector<QVector<QVariant>> data_{};
+	kratos::Table* tbl_{nullptr};
 };
 
