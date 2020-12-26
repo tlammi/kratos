@@ -38,7 +38,7 @@ Rectangle{
                 color: "#efefef"
                 z: -1
             }
-	    onAccepted: headerTableRoot.itemModified(row, column, text)
+	    onAccepted: headerTableRoot.model.set(column, row, text);
         }
     }
 

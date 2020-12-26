@@ -59,6 +59,10 @@ public:
 		layoutChanged();
 	}
 
+	Q_INVOKABLE void set(int x, int y, const QVariant& val){
+		(*tbl_)[y][x] = val.toString().toStdString();
+	}
+
 	bool setData(const QModelIndex& index, const QVariant& value, int role=Qt::EditRole) final {
 		switch(role){
 			case Qt::EditRole:
